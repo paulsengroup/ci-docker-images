@@ -60,8 +60,8 @@ jobs:
           images: ghcr.io/robomics/ubuntu-20.04
           flavor: |
              latest=auto
-             suffix=${{ steps.commit-date.outputs.date }},onlatest=false
-          tag: |
+             suffix=-${{ steps.commit-date.outputs.date }},onlatest=false
+          tags: |
             type=raw,value=${{ matrix.compiler }}
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
