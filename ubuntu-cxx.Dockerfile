@@ -22,15 +22,11 @@ RUN apt-get update -q \
      | tee -a /etc/apt/trusted.gpg.d/kitware_ubuntu_key.asc > /dev/null           \
 &&  curl -s -L 'https://apt.llvm.org/llvm-snapshot.gpg.key'                       \
      | tee -a /etc/apt/trusted.gpg.d/llvm_ubuntu_key.asc > /dev/null              \
-&&  curl -s -L 'https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc' \
-     | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null              \
 &&  add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"                             \
 &&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"     \
 &&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-13 main"  \
 &&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-14 main"  \
-&&  add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"             \
 &&  add-apt-repository -y ppa:ubuntu-toolchain-r/test                                                               \
-&&  add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+                                                                  \
 &&  apt-get remove -q -y curl                       \
                          dirmngr                    \
                          gpg                        \
@@ -69,28 +65,6 @@ RUN apt-get update -q                                    \
 &&  apt-get remove -q -y python3-pip      \
 &&  apt-get autoremove -q -y              \
 &&  rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update -q                          \
-&&  apt-get install -q -y python3-scipy        \
-                          r-base               \
-                          r-base-dev           \
-                          r-cran-minqa         \
-                          r-cran-mnormt        \
-                          r-cran-rcpparmadillo \
-&&  echo "options(Ncpus = $(nproc))" | tee /etc/R/Rprofile.site > /dev/null  \
-&&  mv /etc/R/Makeconf /etc/R/Makeconf.old                                   \
-    | sed -E "s|=\s+gcc|= ccache $(which gcc)|g" /etc/R/Makeconf.old         \
-    | sed -E "s|=\s+g[+]{2}|= ccache $(which g++)|g"                         \
-    | sed -E "s|=\s+gfortran|= ccache $(which gfortran)|g" > /etc/R/Makeconf \
-&&  echo "MAKEFLAGS = -j$(nproc)" >> /etc/R/Makeconf                         \
-&&  rm /etc/R/Makeconf.old \
-&&  Rscript --no-save -e 'install.packages("wCorr", dependencies=c("Depends", "Imports", "LinkingTo"), repos="https://cloud.r-project.org")' \
-&&  apt-get remove -q -y r-base-dev \
-&&  apt-get autoremove -q -y        \
-&&  rm -rf /var/lib/apt/lists/*
-
-RUN Rscript --no-save -e 'quit(status=!library("wCorr", character.only=T, logical.return=T), save="no")'
-RUN python3 -c "import scipy"
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \

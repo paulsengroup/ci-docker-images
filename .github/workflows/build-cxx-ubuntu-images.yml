@@ -1,25 +1,26 @@
 # Copyright (C) 2022 Roberto Rossini (roberros@uio.no)
 # SPDX-License-Identifier: MIT
-name: Build Ubuntu Docker images
+
+name: Build Ubuntu Docker images for C++ development/testing
 on:
   push:
     branches: [ main, devel, testing-ci ]
     paths:
       - ".github/workflows/build-ubuntu-images.yml"
-      - "ubuntu.Dockerfile"
+      - "ubuntu-cxx.Dockerfile"
   pull_request:
     branches: [ main, devel, testing-ci ]
     paths:
       - ".github/workflows/build-ubuntu-images.yml"
-      - "ubuntu.Dockerfile"
+      - "ubuntu-cxx.Dockerfile"
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        base-os:
-          - ubuntu:20.04
+        os-version:
+          - 20.04
         compiler:
           - gcc-7
           - gcc-8
@@ -46,6 +47,7 @@ jobs:
         run: |
           cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
           echo "::set-output name=date::$cdate"
+          
       - name: Extract compiler name and version
         id: compiler-info
         run: |
@@ -53,16 +55,17 @@ jobs:
           compiler_version="$(echo "${{ matrix.compiler}}" | grep -oP '\-[.[:alnum:]]+$' | tr -d '-')"
           echo "::set-output name=name::$compiler_name"
           echo "::set-output name=version::$compiler_version"
+          
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/robomics/ubuntu-20.04
+          images: ghcr.io/robomics/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}
           flavor: |
-             latest=auto
-             suffix=-${{ steps.commit-date.outputs.date }},onlatest=false
+             latest=true
           tags: |
-            type=raw,value=${{ matrix.compiler }}
+            type=raw,value=${{ steps.commit-date.outputs.date }}
+            
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
@@ -70,20 +73,22 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
       - name: Build Docker image and push to registries
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          file: ubuntu.Dockerfile
+          file: ubuntu-cxx.Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=min
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BASE_OS=${{ matrix.base-os }}
+            BASE_OS=ubuntu:${{ matrix.os-version }}
             COMPILER_NAME=${{ steps.compiler-info.outputs.name }}
             COMPILER_VERSION=${{ steps.compiler-info.outputs.version }}
             CMAKE_VERSION=${{ matrix.cmake }}
