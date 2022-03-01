@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM ubuntu:20.04 AS base
+ARG BASE_OS
+
+FROM $BASE_OS AS base
 
 ENV CONAN_V2=1
 ENV CONAN_REVISIONS_ENABLED=1
@@ -22,7 +24,7 @@ RUN apt-get update -q \
      | tee -a /etc/apt/trusted.gpg.d/llvm_ubuntu_key.asc > /dev/null              \
 &&  curl -s -L 'https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc' \
      | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null              \
-&&  add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"                                  \
+&&  add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"                             \
 &&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"     \
 &&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-13 main"  \
 &&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-14 main"  \

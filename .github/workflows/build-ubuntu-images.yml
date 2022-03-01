@@ -21,6 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        base-os:
+          - ubuntu:20.04
         compiler:
           - gcc-7
           - gcc-8
@@ -44,6 +46,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Extract commit author date
+        id: commit-date
+        run: |
+          cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
+          echo "::set-output name=date::$cdate"
+
       - name: Extract compiler name and version
         id: compiler-info
         run: |
@@ -57,8 +65,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/robomics/ubuntu-ci-${{ steps.compiler-info.outputs.name }}
-          tags: type=value=${{ steps.compiler-info.outputs.version }}
+          images: ghcr.io/robomics/ubuntu-20.04
+          flavor: |
+             latest=auto
+             prefix=${{ matrix.compiler }},onlatest=true
+             suffix=${{ steps.commit-date.outputs.date }},onlatest=false
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
@@ -80,9 +91,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=min
           build-args: |
-            --build-arg "COMPILER_NAME=${{ steps.compiler-info.outputs.name }}" \
+            --build-arg "BASE_OS=${{ matrix.base_os }}"                               \
+            --build-arg "COMPILER_NAME=${{ steps.compiler-info.outputs.name }}"       \
             --build-arg "COMPILER_VERSION=${{ steps.compiler-info.outputs.version }}" \
-            --build-arg "CMAKE_VERSION=${{ matrix.cmake }}" \
+            --build-arg "CMAKE_VERSION=${{ matrix.cmake }}"                           \
             --build-arg "CONAN_VERSION=${{ matrix.conan }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
