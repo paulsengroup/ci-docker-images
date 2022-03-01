@@ -6,12 +6,12 @@ on:
   push:
     branches: [ main, devel, testing-ci ]
     paths:
-      - ".github/workflows/build-ubuntu-images.yml"
+      - ".github/workflows/build-cxx-ubuntu-images.yml"
       - "ubuntu-cxx.Dockerfile"
   pull_request:
     branches: [ main, devel, testing-ci ]
     paths:
-      - ".github/workflows/build-ubuntu-images.yml"
+      - ".github/workflows/build-cxx-ubuntu-images.yml"
       - "ubuntu-cxx.Dockerfile"
 jobs:
   build:
