@@ -79,11 +79,11 @@ jobs:
           file: ubuntu.Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=min
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BASE_OS=${{ matrix.base_os }}
+            BASE_OS=${{ matrix.base-os }}
             COMPILER_NAME=${{ steps.compiler-info.outputs.name }}
             COMPILER_VERSION=${{ steps.compiler-info.outputs.version }}
             CMAKE_VERSION=${{ matrix.cmake }}
             CONAN_VERSION=${{ matrix.conan }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
