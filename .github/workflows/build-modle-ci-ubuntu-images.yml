@@ -13,19 +13,17 @@ on:
     paths:
       - ".github/workflows/build-modle-ci-ubuntu-images.yml"
       - "ubuntu-modle-ci.Dockerfile"
-  workflow_run:
-    workflows: [ "Build Ubuntu Docker images for C++ development/testing" ]
-    types: [ completed ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == "success" }}
     strategy:
       fail-fast: false
       matrix:
         os-version:
           - 20.04
+        image-version:
+          - 20220301
         compiler:
           - gcc-7
           - gcc-8
@@ -47,12 +45,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Extract commit author date
-        id: commit-date
-        run: |
-          cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
-          echo "::set-output name=date::$cdate"
-          
+
       - name: Extract compiler name and version
         id: compiler-info
         run: |
@@ -60,16 +53,30 @@ jobs:
           compiler_version="$(echo "${{ matrix.compiler}}" | grep -oP '\-[.[:alnum:]]+$' | tr -d '-')"
           echo "::set-output name=name::$compiler_name"
           echo "::set-output name=version::$compiler_version"
+
+      - name: Generate base image label
+        id: generate-base-img-label
+        run: |
+          label="ghcr.io/robomics/ci-docker-images/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}:${{ matrix.image-version }}"
           
+          echo "::set-output name=label::$label"
+
+      - name: Generate image name
+        id: generate-img-name
+        run: |
+          name="ghcr.io/robomics/ci-docker-images/modle/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}"
+          
+          echo "::set-output name=name::$name"
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/robomics/ci-docker-images/modle/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}
+          images: ${{ steps.generate-img-name.outputs.name }}
           flavor: |
              latest=true
           tags: |
-            type=raw,value=${{ steps.commit-date.outputs.date }}
+            type=raw,value=${{ matrix.image-version }}
             
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
@@ -93,7 +100,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BASE_OS=ghcr.io/robomics/ci-docker-images/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}
+            BASE_OS=${{ steps.generate-base-img-label.outputs.label }}
             COMPILER_NAME=${{ steps.compiler-info.outputs.name }}
             COMPILER_VERSION=${{ steps.compiler-info.outputs.version }}
             CMAKE_VERSION=${{ matrix.cmake }}
