@@ -69,15 +69,15 @@ RUN apt-get update -q                                    \
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100                      \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100;                   \
+&&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100; \
 fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
-    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100        \
-&&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100                                \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100;                           \
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100       \
+&&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100 \
+&&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$COMPILER_VERSION 100             \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100;        \
 fi
 
 RUN conan profile new "$HOME/.conan/profiles/default" --detect --force          \
