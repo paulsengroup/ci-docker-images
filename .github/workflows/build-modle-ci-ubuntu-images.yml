@@ -23,7 +23,7 @@ jobs:
         os-version:
           - 20.04
         image-version:
-          - 20220301
+          - 20220302
         compiler:
           - gcc-7
           - gcc-8
@@ -68,6 +68,16 @@ jobs:
           
           echo "::set-output name=name::$name"
 
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          os="ubuntu:${{ matrix.os-version }}"
+          compiler="${{ matrix.compiler }}"
+          cmake_ver="cmake-${{ matrix.cmake }}"
+          conan_ver="conan-${{ matrix.conan }}"
+          
+          echo "::set-output name=key::modle-ci-$os-$compiler-$cmake_ver-$conan_ver"
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v3
@@ -95,8 +105,8 @@ jobs:
         with:
           push: ${{ github.event_name != 'pull_request' }}
           file: ubuntu-modle-ci.Dockerfile
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
+          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
+          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |

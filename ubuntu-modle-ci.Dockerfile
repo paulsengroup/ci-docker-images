@@ -49,9 +49,9 @@ RUN apt-get update -q                          \
                           r-cran-rcpparmadillo \
 &&  echo "options(Ncpus = $(nproc))" | tee /etc/R/Rprofile.site > /dev/null  \
 &&  mv /etc/R/Makeconf /etc/R/Makeconf.old                                   \
-    | sed -E "s|=\s+gcc|= $(which gcc)|g" /etc/R/Makeconf.old         \
-    | sed -E "s|=\s+g[+]{2}|= $(which g++)|g"                         \
-    | sed -E "s|=\s+gfortran|= $(which gfortran)|g" > /etc/R/Makeconf \
+    | sed -E "s|=\s+gcc|= $(which gcc)|g" /etc/R/Makeconf.old                \
+    | sed -E "s|=\s+g[+]{2}|= $(which g++)|g"                                \
+    | sed -E "s|=\s+gfortran|= $(which gfortran)|g" > /etc/R/Makeconf        \
 &&  echo "MAKEFLAGS = -j$(nproc)" >> /etc/R/Makeconf                         \
 &&  rm /etc/R/Makeconf.old \
 &&  Rscript --no-save -e 'install.packages("wCorr", dependencies=c("Depends", "Imports", "LinkingTo"), repos="https://cloud.r-project.org")' \
