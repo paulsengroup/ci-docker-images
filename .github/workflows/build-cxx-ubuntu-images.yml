@@ -82,7 +82,7 @@ jobs:
         id: cache-key
         run: |
           os="ubuntu:${{ matrix.os-version }}"
-          compiler="${{ steps.compiler-info.outputs.name }}-${{ steps.compiler-info.outputs.version }}"
+          compiler="${{ matrix.compiler }}"
           cmake_ver="cmake-${{ matrix.cmake }}"
           conan_ver="conan-${{ matrix.conan }}"
           
