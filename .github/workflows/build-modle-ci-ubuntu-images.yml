@@ -4,12 +4,12 @@
 name: Build Ubuntu Docker for MoDLE CI
 on:
   push:
-    branches: [ main, devel, testing-ci ]
+    branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-modle-ci-ubuntu-images.yml"
       - "ubuntu-modle-ci.Dockerfile"
   pull_request:
-    branches: [ main, devel, testing-ci ]
+    branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-modle-ci-ubuntu-images.yml"
       - "ubuntu-modle-ci.Dockerfile"
@@ -23,7 +23,7 @@ jobs:
         os-version:
           - 20.04
         image-version:
-          - 20220302
+          - 20220305
         compiler:
           - gcc-7
           - gcc-8
@@ -57,14 +57,14 @@ jobs:
       - name: Generate base image label
         id: generate-base-img-label
         run: |
-          label="ghcr.io/robomics/ci-docker-images/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}:${{ matrix.image-version }}"
+          label="ghcr.io/paulsen-lab/ci-docker-images/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}:${{ matrix.image-version }}"
           
           echo "::set-output name=label::$label"
 
       - name: Generate image name
         id: generate-img-name
         run: |
-          name="ghcr.io/robomics/ci-docker-images/modle/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}"
+          name="ghcr.io/paulsen-lab/ci-docker-images/modle/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}"
           
           echo "::set-output name=name::$name"
 
