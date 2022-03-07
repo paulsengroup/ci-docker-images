@@ -41,8 +41,7 @@ RUN if [ $COMPILER_VERSION = "" ]; then echo "Missing COMPILER_VERSION definitio
 RUN if [ $CONAN_VERSION = "" ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
 
 RUN apt-get update -q                          \
-&&  apt-get install -q -y git                  \
-                          python3-scipy        \
+&&  apt-get install -q -y python3-scipy        \
                           r-base               \
                           r-base-dev           \
                           r-cran-minqa         \
@@ -66,6 +65,10 @@ RUN Rscript --no-save -e 'quit(status=!library("wCorr", character.only=T, logica
 RUN python3 -c "import scipy"
 
 FROM base as final
+
+RUN apt-get update -q           \
+&&  apt-get install -q -y git   \
+&&  rm -rf /var/lib/apt/lists/*
 
 ARG CMAKE_VERSION
 

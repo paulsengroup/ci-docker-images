@@ -62,7 +62,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/paulsen-lab/ci-docker-images/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}
+          images: ghcr.io/${{ github.repository }}/ubuntu-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}
           flavor: |
              latest=true
           tags: |
