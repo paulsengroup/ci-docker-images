@@ -59,6 +59,7 @@ RUN apt-get update -q                                    \
                           ninja-build                    \
                           python3                        \
                           python3-pip                    \
+                          zstd                           \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y "g++-${COMPILER_VERSION}"; fi \
 &&  pip install "cmake==${CMAKE_VERSION}" \
                 "conan==${CONAN_VERSION}" \
