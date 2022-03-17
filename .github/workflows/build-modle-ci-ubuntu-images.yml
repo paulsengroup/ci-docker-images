@@ -23,7 +23,7 @@ jobs:
         os-version:
           - 20.04
         image-version:
-          - 20220307
+          - 20220317
         compiler:
           - gcc-7
           - gcc-8
