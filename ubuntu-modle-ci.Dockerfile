@@ -66,8 +66,9 @@ RUN python3 -c "import scipy"
 
 FROM base as final
 
-RUN apt-get update -q           \
-&&  apt-get install -q -y git   \
+RUN apt-get update -q                \
+&&  apt-get install -q -y git        \
+                          hdf5-tools \
 &&  rm -rf /var/lib/apt/lists/*
 
 ARG CMAKE_VERSION
