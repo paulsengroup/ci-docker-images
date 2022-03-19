@@ -64,11 +64,26 @@ FROM base as testing
 RUN Rscript --no-save -e 'quit(status=!library("wCorr", character.only=T, logical.return=T), save="no")'
 RUN python3 -c "import scipy"
 
+FROM base as download-hdf5
+
+RUN apt-get update -q           \
+&&  apt-get install -q -y curl  \
+&&  rm -rf /var/lib/apt/lists/*
+
+RUN curl -L 'https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/bin/unix/hdf5-1.12.1-Std-ubuntu2004_64.tar.gz' \
+    | tar -xzf - \
+&&  cd hdf \
+&&  ./HDF5-1.12.1-Linux.sh --skip-license
+
 FROM base as final
+
+COPY --from=download-hdf5  /hdf/HDF_Group/HDF5/1.12.1/bin/h5diff  /usr/local/bin/h5diff
+COPY --from=download-hdf5  /hdf/COPYING  /usr/share/doc/h5diff/copyright
+
+RUN chmod 755 /usr/local/bin/h5diff
 
 RUN apt-get update -q                \
 &&  apt-get install -q -y git        \
-                          hdf5-tools \
 &&  rm -rf /var/lib/apt/lists/*
 
 ARG CMAKE_VERSION
