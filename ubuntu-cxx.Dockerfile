@@ -13,27 +13,6 @@ ENV CONAN_CMAKE_GENERATOR=Ninja
 
 ARG PIP_NO_CACHE_DIR=0
 
-RUN apt-get update -q \
-&&  apt-get install -q -y curl                       \
-                          dirmngr                    \
-                          gpg                        \
-                          software-properties-common \
-&&  curl -s -L 'https://apt.kitware.com/keys/kitware-archive-latest.asc'          \
-     | tee -a /etc/apt/trusted.gpg.d/kitware_ubuntu_key.asc > /dev/null           \
-&&  curl -s -L 'https://apt.llvm.org/llvm-snapshot.gpg.key'                       \
-     | tee -a /etc/apt/trusted.gpg.d/llvm_ubuntu_key.asc > /dev/null              \
-&&  add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"                             \
-&&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"     \
-&&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-13 main"  \
-&&  add-apt-repository -y "deb https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-14 main"  \
-&&  add-apt-repository -y ppa:ubuntu-toolchain-r/test                                                               \
-&&  apt-get remove -q -y curl                       \
-                         dirmngr                    \
-                         gpg                        \
-                         software-properties-common \
-&&  apt-get autoremove -q -y                        \
-&&  rm -rf /var/lib/apt/lists/*
-
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 && echo CET | tee /etc/timezone > /dev/null
 
@@ -85,7 +64,6 @@ RUN conan profile new "$HOME/.conan/profiles/default" --detect --force          
 &&  conan config init                                                           \
 &&  conan profile update settings.compiler="$COMPILER_NAME" default             \
 &&  conan profile update settings.compiler.version="$COMPILER_VERSION" default  \
-&&  conan profile update settings.compiler.libcxx=libstdc++11 default           \
 &&  conan profile update settings.compiler.cppstd=17 default
 
 # Add "7" to the list of known Clang versions
