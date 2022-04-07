@@ -32,7 +32,7 @@ RUN if [ $CONAN_VERSION = "" ]; then echo "Missing CONAN_VERSION definition" && 
 RUN apt-get update -q                                    \
 &&  apt-get install -q -y "$COMPILER"                    \
                           ccache                         \
-                          "clang-tidy-$COMPILER_VERSION" \
+                          clang-tidy                     \
                           cppcheck                       \
                           make                           \
                           ninja-build                    \
