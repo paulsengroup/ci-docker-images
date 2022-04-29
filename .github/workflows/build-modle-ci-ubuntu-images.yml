@@ -13,28 +13,35 @@ on:
     paths:
       - ".github/workflows/build-modle-ci-ubuntu-images.yml"
       - "ubuntu-modle-ci.Dockerfile"
+  workflow_run:
+    workflows: [ "Build Ubuntu Docker images for C++ development/testing" ]
+    branches: [ main, devel, ci-devel ]
+    types: [ completed ]
 
 jobs:
-  build:
+  build-image-ubuntu:
     runs-on: ubuntu-latest
+    #if: |
+    #  github.event_name != 'workflow_run' ||
+    #  github.event.workflow_run.conclusion == 'success'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { compiler: gcc-7,     os: 'ubuntu-20.04', image-version: '20220407' }
-          - { compiler: gcc-8,     os: 'ubuntu-20.04', image-version: '20220407' }
-          - { compiler: gcc-9,     os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: gcc-10,    os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: gcc-11,    os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: gcc-12,    os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: clang-7,   os: 'ubuntu-20.04', image-version: '20220407' }
-          - { compiler: clang-8,   os: 'ubuntu-20.04', image-version: '20220407' }
-          - { compiler: clang-9,   os: 'ubuntu-20.04', image-version: '20220407' }
-          - { compiler: clang-10,  os: 'ubuntu-20.04', image-version: '20220407' }
-          - { compiler: clang-11,  os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: clang-12,  os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: clang-13,  os: 'ubuntu-22.04', image-version: '20220407' }
-          - { compiler: clang-14,  os: 'ubuntu-22.04', image-version: '20220407' }
+          - { compiler: gcc-7,     os: 'ubuntu-20.04', image-version: 'latest' }
+          - { compiler: gcc-8,     os: 'ubuntu-20.04', image-version: 'latest' }
+          - { compiler: gcc-9,     os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: gcc-10,    os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: gcc-11,    os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: gcc-12,    os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: clang-7,   os: 'ubuntu-20.04', image-version: 'latest' }
+          - { compiler: clang-8,   os: 'ubuntu-20.04', image-version: 'latest' }
+          - { compiler: clang-9,   os: 'ubuntu-20.04', image-version: 'latest' }
+          - { compiler: clang-10,  os: 'ubuntu-20.04', image-version: 'latest' }
+          - { compiler: clang-11,  os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: clang-12,  os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: clang-13,  os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler: clang-14,  os: 'ubuntu-22.04', image-version: 'latest' }
     steps:
       - name: Checkout
         uses: actions/checkout@v3
