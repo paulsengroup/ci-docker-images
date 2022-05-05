@@ -61,7 +61,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler }}
           flavor: |
