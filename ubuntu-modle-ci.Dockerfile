@@ -73,14 +73,14 @@ RUN apt-get update -q           \
 &&  apt-get install -q -y curl  \
 &&  rm -rf /var/lib/apt/lists/*
 
-RUN curl -L 'https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/bin/unix/hdf5-1.12.1-Std-ubuntu2004_64.tar.gz' \
+RUN curl -L 'https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/bin/unix/hdf5-1.12.2-Std-ubuntu2004_64.tar.gz' \
     | tar -xzf - \
 &&  cd hdf \
-&&  ./HDF5-1.12.1-Linux.sh --skip-license
+&&  ./HDF5-1.12.2-Linux.sh --skip-license
 
 FROM base as final
 
-COPY --from=download-hdf5  /hdf/HDF_Group/HDF5/1.12.1/bin/h5diff  /usr/local/bin/h5diff
+COPY --from=download-hdf5  /hdf/HDF_Group/HDF5/1.12.2/bin/h5diff  /usr/local/bin/h5diff
 COPY --from=download-hdf5  /hdf/COPYING  /usr/share/doc/h5diff/copyright
 
 RUN chmod 755 /usr/local/bin/h5diff
