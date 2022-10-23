@@ -18,75 +18,74 @@ on:
     branches: [ main, devel, ci-devel ]
     types: [ completed ]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build-image-ubuntu:
+  build-ubuntu-image:
     runs-on: ubuntu-latest
-    #if: |
-    #  github.event_name != 'workflow_run' ||
-    #  github.event.workflow_run.conclusion == 'success'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { compiler: gcc-7,     os: 'ubuntu-20.04', image-version: 'latest' }
-          - { compiler: gcc-8,     os: 'ubuntu-20.04', image-version: 'latest' }
-          - { compiler: gcc-9,     os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: gcc-10,    os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: gcc-11,    os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: gcc-12,    os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: clang-7,   os: 'ubuntu-20.04', image-version: 'latest' }
-          - { compiler: clang-8,   os: 'ubuntu-20.04', image-version: 'latest' }
-          - { compiler: clang-9,   os: 'ubuntu-20.04', image-version: 'latest' }
-          - { compiler: clang-10,  os: 'ubuntu-20.04', image-version: 'latest' }
-          - { compiler: clang-11,  os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: clang-12,  os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: clang-13,  os: 'ubuntu-22.04', image-version: 'latest' }
-          - { compiler: clang-14,  os: 'ubuntu-22.04', image-version: 'latest' }
+          - { compiler-name: gcc,   compiler-version: 8,  os: 'ubuntu-20.04' }
+          - { compiler-name: gcc,   compiler-version: 9,  os: 'ubuntu-22.04' }
+          - { compiler-name: gcc,   compiler-version: 10, os: 'ubuntu-22.04' }
+          - { compiler-name: gcc,   compiler-version: 11, os: 'ubuntu-22.04' }
+          - { compiler-name: gcc,   compiler-version: 12, os: 'ubuntu-22.04' }
+
+          - { compiler-name: clang, compiler-version: 8,  os: 'ubuntu-20.04' }
+          - { compiler-name: clang, compiler-version: 9,  os: 'ubuntu-20.04' }
+          - { compiler-name: clang, compiler-version: 10, os: 'ubuntu-20.04' }
+          - { compiler-name: clang, compiler-version: 11, os: 'ubuntu-22.04' }
+          - { compiler-name: clang, compiler-version: 12, os: 'ubuntu-22.04' }
+          - { compiler-name: clang, compiler-version: 13, os: 'ubuntu-22.04' }
+          - { compiler-name: clang, compiler-version: 14, os: 'ubuntu-22.04' }
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Extract compiler name and version
-        id: compiler-info
+      - name: Extract commit author date
+        id: commit-date
         run: |
-          compiler_name="$(echo "${{ matrix.compiler}}" | grep -oP '^[[:alnum:]]+-' | tr -d '-')"
-          compiler_version="$(echo "${{ matrix.compiler}}" | grep -oP '\-[.[:alnum:]]+$' | tr -d '-')"
-          echo "::set-output name=name::$compiler_name"
-          echo "::set-output name=version::$compiler_version"
+          cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
+          _date="$(date +%Y%m%d)"
+          
+          echo "commit_date=$cdate" >> $GITHUB_OUTPUT
+          echo "date=$_date" >> $GITHUB_OUTPUT
 
       - name: Generate base image label
         id: generate-base-img-label
         run: |
-          label="ghcr.io/${{ github.repository }}/${{ matrix.os }}-cxx-${{ matrix.compiler }}:${{ matrix.image-version }}"
+          label="ghcr.io/${{ github.repository }}/"
+          label+="${{ matrix.os }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}:latest"
           
-          echo "::set-output name=label::$label"
+          echo "label=$label" >> $GITHUB_OUTPUT
 
       - name: Generate image name
         id: generate-img-name
         run: |
-          name="ghcr.io/${{ github.repository }}/modle/${{ matrix.os }}-cxx-${{ matrix.compiler }}"
+          name="ghcr.io/${{ github.repository }}/modle/"
+          name+="${{ matrix.os }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
           
-          echo "::set-output name=name::$name"
+          echo "name=$name" >> $GITHUB_OUTPUT
 
       - name: Generate cache key
         id: cache-key
         run: |
           os="${{ matrix.os }}"
-          compiler="${{ matrix.compiler }}"
-          cmake_ver="cmake-${{ matrix.cmake }}"
-          conan_ver="conan-${{ matrix.conan }}"
+          compiler="${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
           
-          echo "::set-output name=key::modle-ci-$os-$compiler-$cmake_ver-$conan_ver"
+          echo "key=modle-ci-$os-$compiler" >> $GITHUB_OUTPUT
 
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: ${{ steps.generate-img-name.outputs.name }}
-          flavor: |
-            latest=true
-          tags: |
-            type=raw,value=${{ matrix.image-version }}
+          flavor: latest=true
+          tags: type=raw,value=${{ steps.commit-date.outputs.date }}
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
@@ -111,7 +110,33 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BASE_OS=${{ steps.generate-base-img-label.outputs.label }}
-            COMPILER_NAME=${{ steps.compiler-info.outputs.name }}
-            COMPILER_VERSION=${{ steps.compiler-info.outputs.version }}
-            CMAKE_VERSION=${{ matrix.cmake }}
-            CONAN_VERSION=${{ matrix.conan }}
+
+  test-ubuntu-image:
+    needs: build-ubuntu-image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-20.04-cxx-gcc-8:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-9:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-10:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-11:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-12:latest" }
+
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-20.04-cxx-clang-8:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-20.04-cxx-clang-9:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-20.04-cxx-clang-10:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-11:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-12:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-13:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-14:latest" }
+
+    container: ${{ matrix.image }}
+
+    steps:
+      - name: Test wCorr
+        run: Rscript --no-save -e 'quit(status=!library("wCorr", character.only=T, logical.return=T), save="no")'
+
+      - name: Test SciPy
+        run: python3 -c "import scipy"

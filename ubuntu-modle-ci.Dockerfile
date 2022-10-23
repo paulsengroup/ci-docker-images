@@ -30,19 +30,6 @@ RUN if ! echo "$BASE_OS" | grep -q 'ubuntu-22.04' 2> /dev/null; then \
 &&  rm -rf /var/lib/apt/lists/* ;                   \
 fi
 
-ARG CMAKE_VERSION
-
-ARG COMPILER_NAME
-ARG COMPILER_VERSION
-ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
-
-ARG CONAN_VERSION
-
-RUN if [ $CMAKE_VERSION = "" ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
-RUN if [ $COMPILER_NAME = "" ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
-RUN if [ $COMPILER_VERSION = "" ]; then echo "Missing COMPILER_VERSION definition" && exit 1; fi
-RUN if [ $CONAN_VERSION = "" ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
-
 RUN apt-get update -q                          \
 &&  apt-get install -q -y python3-scipy        \
                           r-base               \
@@ -58,49 +45,9 @@ RUN apt-get update -q                          \
 &&  echo "MAKEFLAGS = -j$(nproc)" >> /etc/R/Makeconf                         \
 &&  rm /etc/R/Makeconf.old \
 &&  Rscript --no-save -e 'install.packages("wCorr", dependencies=c("Depends", "Imports", "LinkingTo"), repos="https://cloud.r-project.org")' \
-&&  apt-get remove -q -y r-base-dev \
-&&  apt-get autoremove -q -y        \
+&&  apt-get remove -q -y r-base-dev  \
+&&  apt-get autoremove -q -y         \
 &&  rm -rf /var/lib/apt/lists/*
 
-FROM base as testing
-
-RUN Rscript --no-save -e 'quit(status=!library("wCorr", character.only=T, logical.return=T), save="no")'
-RUN python3 -c "import scipy"
-
-FROM base as download-hdf5
-
-RUN apt-get update -q           \
-&&  apt-get install -q -y curl  \
-&&  rm -rf /var/lib/apt/lists/*
-
-RUN curl -L 'https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/bin/unix/hdf5-1.12.2-Std-ubuntu2004_64.tar.gz' \
-    | tar -xzf - \
-&&  cd hdf \
-&&  ./HDF5-1.12.2-Linux.sh --skip-license
-
-FROM base as final
-
-COPY --from=download-hdf5  /hdf/HDF_Group/HDF5/1.12.2/bin/h5diff  /usr/local/bin/h5diff
-COPY --from=download-hdf5  /hdf/COPYING  /usr/share/doc/h5diff/copyright
-
-RUN chmod 755 /usr/local/bin/h5diff
-
-RUN apt-get update -q                \
-&&  apt-get install -q -y git        \
-&&  rm -rf /var/lib/apt/lists/*
-
-ARG CMAKE_VERSION
-
-ARG COMPILER_NAME
-ARG COMPILER_VERSION
-ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
-
-ARG CONAN_VERSION
-
-ENV CC=/usr/bin/cc
-ENV CXX=/usr/bin/c++
 
 LABEL maintainer='Roberto Rossini <roberros@uio.no>'
-LABEL compiler="$COMPILER"
-LABEL cmake="cmake-$CMAKE_VERSION"
-LABEL conan="conan-$CONAN_VERSION"
