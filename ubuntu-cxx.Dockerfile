@@ -61,15 +61,19 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100;        \
 fi
 
-RUN conan profile new "$HOME/.conan/profiles/default" --detect --force          \
-&&  conan config init                                                           \
-&&  conan profile update settings.compiler="$COMPILER_NAME" default             \
-&&  conan profile update settings.compiler.version="$COMPILER_VERSION" default  \
-&&  conan profile update settings.compiler.cppstd=17 default \
-&&  conan profile update settings.compiler.libcxx=libstdc++11 default
+
+RUN mkdir -p /opt/conan/profiles \
+&&  conan config init                                                                               \
+&&  conan profile new /opt/conan/profiles/default --detect --force                                  \
+&&  conan profile update settings.compiler="$COMPILER_NAME" /opt/conan/profiles/default             \
+&&  conan profile update settings.compiler.version="$COMPILER_VERSION" /opt/conan/profiles/default  \
+&&  conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default                    \
+&&  conan profile update settings.compiler.libcxx=libstdc++11 /opt/conan/profiles/default
 
 ENV CC=/usr/bin/cc
 ENV CXX=/usr/bin/c++
+ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
+
 
 LABEL maintainer='Roberto Rossini <roberros@uio.no>'
 LABEL compiler="$COMPILER"

@@ -103,14 +103,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-gcc-7:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-gcc-8:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-9:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-10:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-11:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-12:latest" }
 
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-7:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-8:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-9:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-10:latest" }
@@ -119,8 +117,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-13:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14:latest" }
 
-    container:
-      image: ${{ matrix.image }}
+    container: ${{ matrix.image }}
 
     steps:
       - name: Print distro information
@@ -139,4 +136,4 @@ jobs:
       - name: Test Conan
         run: |
           printf '[requires]\nfmt/9.1.0' > conanfile.txt
-          conan install --build=fmt conanfile.txt
+          conan install --build=fmt -pr:b=/root/.conan/profiles/default conanfile.txt
