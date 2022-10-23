@@ -15,6 +15,9 @@ on:
       - "ubuntu-cxx.Dockerfile"
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build-ubuntu-image:
