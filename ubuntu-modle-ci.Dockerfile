@@ -12,42 +12,51 @@ ARG PIP_NO_CACHE_DIR=0
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 && echo CET | tee /etc/timezone > /dev/null
 
-RUN if ! echo "$BASE_OS" | grep -q 'ubuntu-22.04' 2> /dev/null; then \
-    apt-get update -q \
-&&  apt-get install -q -y curl                       \
-                          dirmngr                    \
-                          gpg                        \
-                          software-properties-common \
-&&  curl -s -L 'https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc' \
-     | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc > /dev/null              \
-&&  add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
-&&  add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+                                                      \
-&&  apt-get remove -q -y curl                       \
-                         dirmngr                    \
-                         gpg                        \
-                         software-properties-common \
-&&  apt-get autoremove -q -y                        \
-&&  rm -rf /var/lib/apt/lists/* ;                   \
-fi
+ARG WCORR_VERSION='1.9.5'
+ARG RSCRIPT_INSTALL_STR="install.packages('wCorr', version='$WCORR_VERSION', dependencies=c('Depends', 'Imports', 'LinkingTo'), repos='https://cloud.r-project.org')"
 
-RUN apt-get update -q                          \
-&&  apt-get install -q -y python3-scipy        \
-                          r-base               \
-                          r-base-dev           \
-                          r-cran-minqa         \
-                          r-cran-mnormt        \
-                          r-cran-rcpparmadillo \
+RUN apt-get update -q                             \
+&&  apt-get install -q -y --no-install-recommends \
+                          r-base                  \
+                          r-base-dev              \
+                          r-cran-minqa            \
+                          r-cran-mnormt           \
+                          r-cran-rcpparmadillo    \
 &&  echo "options(Ncpus = $(nproc))" | tee /etc/R/Rprofile.site > /dev/null  \
-&&  mv /etc/R/Makeconf /etc/R/Makeconf.old                                   \
-    | sed -E "s|=\s+gcc|= $(which gcc)|g" /etc/R/Makeconf.old                \
-    | sed -E "s|=\s+g[+]{2}|= $(which g++)|g"                                \
-    | sed -E "s|=\s+gfortran|= $(which gfortran)|g" > /etc/R/Makeconf        \
+&&  sed -iE "s|=\s+gcc|= $(which gcc)|g" /etc/R/Makeconf                     \
+&&  sed -iE "s|=\s+g[+]{2}|= $(which g++)|g" /etc/R/Makeconf                 \
+&&  sed -iE "s|=\s+gfortran|= $(which gfortran)|g" /etc/R/Makeconf           \
 &&  echo "MAKEFLAGS = -j$(nproc)" >> /etc/R/Makeconf                         \
-&&  rm /etc/R/Makeconf.old \
-&&  Rscript --no-save -e 'install.packages("wCorr", dependencies=c("Depends", "Imports", "LinkingTo"), repos="https://cloud.r-project.org")' \
-&&  apt-get remove -q -y r-base-dev  \
-&&  apt-get autoremove -q -y         \
+&&  Rscript --no-save -e "$RSCRIPT_INSTALL_STR" \
+&&  apt-get remove -q -y r-base-dev             \
+&&  apt-get autoremove -q -y                    \
 &&  rm -rf /var/lib/apt/lists/*
 
 
-LABEL maintainer='Roberto Rossini <roberros@uio.no>'
+ARG COOLER_VERSION='0.8.11'
+ARG SCIPY_VERSION='1.9'
+
+RUN apt-get update -q                             \
+&&  apt-get install -q -y --no-install-recommends \
+                          gcc                     \
+                          python3                 \
+                          python3-dev             \
+                          python3-pip             \
+&&  pip3 install cython numpy                     \
+&&  pip3 install "cooler==$COOLER_VERSION"        \
+                "scipy>=$SCIPY_VERSION"           \
+&&  pip uninstall -y cython                       \
+&&  apt-get remove -q -y gcc                      \
+                         python3-dev              \
+                         python3-pip              \
+&&  apt-get autoremove -q -y                      \
+&&  rm -rf /var/lib/apt/lists/*
+
+
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
+LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
+LABEL org.opencontainers.image.url='https://github.com/paulsengroup/ci-docker-images'
+LABEL org.opencontainers.image.documentation='https://github.com/paulsengroup/ci-docker-images'
+LABEL org.opencontainers.image.source='https://github.com/paulsengroup/ci-docker-images'
+LABEL org.opencontainers.image.licenses='MIT'
+LABEL org.opencontainers.image.title='ubuntu-modle-ci'
