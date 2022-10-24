@@ -41,6 +41,7 @@ RUN apt-get update -q                                    \
                           python3                        \
                           python3-dev                    \
                           python3-pip                    \
+                          xz-utils                       \
                           zstd                           \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y "g++-${COMPILER_VERSION}"; fi \
 &&  pip3 install "cmake==${CMAKE_VERSION}" \
