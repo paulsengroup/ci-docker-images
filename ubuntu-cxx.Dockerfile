@@ -30,7 +30,8 @@ RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition"
 RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
 
 RUN apt-get update -q                                    \
-&&  apt-get install -q -y "$COMPILER"                    \
+&&  apt-get install -q -y --no-install-recommends        \
+                          "$COMPILER"                    \
                           ccache                         \
                           clang-tidy                     \
                           cppcheck                       \
@@ -38,13 +39,15 @@ RUN apt-get update -q                                    \
                           make                           \
                           ninja-build                    \
                           python3                        \
+                          python3-dev                    \
                           python3-pip                    \
                           zstd                           \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y "g++-${COMPILER_VERSION}"; fi \
-&&  pip install "cmake==${CMAKE_VERSION}" \
-                "conan==${CONAN_VERSION}" \
-&&  apt-get remove -q -y python3-pip      \
-&&  apt-get autoremove -q -y              \
+&&  pip3 install "cmake==${CMAKE_VERSION}" \
+                 "conan==${CONAN_VERSION}" \
+&&  apt-get remove -q -y python3-dev       \
+                         python3-pip       \
+&&  apt-get autoremove -q -y               \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
@@ -75,7 +78,13 @@ ENV CXX=/usr/bin/c++
 ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 
 
-LABEL maintainer='Roberto Rossini <roberros@uio.no>'
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
+LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
+LABEL org.opencontainers.image.url='https://github.com/paulsengroup/ci-docker-images'
+LABEL org.opencontainers.image.documentation='https://github.com/paulsengroup/ci-docker-images'
+LABEL org.opencontainers.image.source='https://github.com/paulsengroup/ci-docker-images'
+LABEL org.opencontainers.image.licenses='MIT'
+LABEL org.opencontainers.image.title='ubuntu-ci'
 LABEL compiler="$COMPILER"
 LABEL cmake="cmake-$CMAKE_VERSION"
 LABEL conan="conan-$CONAN_VERSION"
