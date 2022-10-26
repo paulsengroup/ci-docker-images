@@ -60,6 +60,8 @@ ENV CC=/usr/bin/cc
 ENV CXX=/usr/bin/c++
 ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 
+ENV LD_LIBRARY_PATH="/opt/rh/httpd24/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
 LABEL org.opencontainers.image.url='https://github.com/paulsengroup/ci-docker-images'

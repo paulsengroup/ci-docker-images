@@ -7,12 +7,12 @@ on:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-centos7-cxx-image.yml"
-      - "centos7-cxx.Dockerfile"
+      - "dockerfiles/centos7-cxx.Dockerfile"
   pull_request:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-centos7-cxx-image.yml"
-      - "centos7-cxx.Dockerfile"
+      - "dockerfiles/centos7-cxx.Dockerfile"
   workflow_dispatch:
 
 defaults:
