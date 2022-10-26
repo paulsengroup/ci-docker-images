@@ -7,12 +7,12 @@ on:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-cxx-ubuntu-images.yml"
-      - "ubuntu-cxx.Dockerfile"
+      - "dockerfiles/ubuntu-cxx.Dockerfile"
   pull_request:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-cxx-ubuntu-images.yml"
-      - "ubuntu-cxx.Dockerfile"
+      - "dockerfiles/ubuntu-cxx.Dockerfile"
   workflow_dispatch:
 
 defaults:
@@ -87,7 +87,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          file: ubuntu-cxx.Dockerfile
+          file: dockerfiles/ubuntu-cxx.Dockerfile
           cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
           cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
           tags: ${{ steps.meta.outputs.tags }}

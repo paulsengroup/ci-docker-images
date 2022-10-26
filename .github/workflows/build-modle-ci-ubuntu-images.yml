@@ -7,12 +7,12 @@ on:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-modle-ci-ubuntu-images.yml"
-      - "ubuntu-modle-ci.Dockerfile"
+      - "dockerfiles/ubuntu-modle-ci.Dockerfile"
   pull_request:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-modle-ci-ubuntu-images.yml"
-      - "ubuntu-modle-ci.Dockerfile"
+      - "dockerfiles/ubuntu-modle-ci.Dockerfile"
   workflow_run:
     workflows: [ "Build Ubuntu Docker images for CXX development/testing" ]
     branches: [ main, devel, ci-devel ]
@@ -103,7 +103,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          file: ubuntu-modle-ci.Dockerfile
+          file: dockerfiles/ubuntu-modle-ci.Dockerfile
           cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
           cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
           tags: ${{ steps.meta.outputs.tags }}
