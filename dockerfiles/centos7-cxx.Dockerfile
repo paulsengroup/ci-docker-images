@@ -45,7 +45,7 @@ RUN ccache --version
 # Install CMake and Conan
 RUN pip3 install --upgrade pip  \
 && pip3 install 'cmake>=3.20'   \
-                'conan>=1.51.3'
+                'conan>=1.53.0'
 
 # Init conan profile
 RUN mkdir -p /opt/conan/profiles \
