@@ -28,7 +28,7 @@ RUN update-alternatives --install /usr/bin/cc cc /opt/rh/devtoolset-11/root/usr/
 ARG CCACHE_VERSION
 ARG CCACHE_SHA256
 ARG CCACHE_VERSION="${CCACHE_VERSION:-4.7.4}"
-ARG CCACHE_SHA256="${CCACHE_SHA256:-df0c64d15d3efaf0b4f6837dd6b1467e40eeaaa807db25ce79c3a08a46a84e36}"
+ARG CCACHE_SHA256="${CCACHE_SHA256:-0b700cc10884f7faf615203241d34eba7ebe0723f38f6aeb77569a556ff37313}"
 
 ARG CCACHE_URL="https://github.com/ccache/ccache/releases/download/v$CCACHE_VERSION/ccache-$CCACHE_VERSION-linux-x86_64.tar.xz"
 
