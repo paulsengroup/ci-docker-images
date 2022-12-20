@@ -34,7 +34,8 @@ RUN apt-get update -q                             \
 
 
 ARG COOLER_VERSION='0.8.11'
-ARG SCIPY_VERSION='1.9'
+ARG SCIPY_VERSION='>=1.9'
+ARG NUMPY_VERSION='<1.24'
 
 RUN apt-get update -q                             \
 &&  apt-get install -q -y --no-install-recommends \
@@ -42,9 +43,10 @@ RUN apt-get update -q                             \
                           python3                 \
                           python3-dev             \
                           python3-pip             \
-&&  pip3 install cython numpy                     \
 &&  pip3 install "cooler==$COOLER_VERSION"        \
-                "scipy>=$SCIPY_VERSION"           \
+                  cython                          \
+                 "numpy$NUMPY_VERSION"            \
+                 "scipy$SCIPY_VERSION"            \
 &&  pip uninstall -y cython                       \
 &&  apt-get remove -q -y gcc                      \
                          python3-dev              \
