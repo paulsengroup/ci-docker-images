@@ -43,7 +43,8 @@ RUN apt-get update -q                             \
                           python3                 \
                           python3-dev             \
                           python3-pip             \
-&&  pip3 install "cooler==$COOLER_VERSION"        \
+&&  CC=/usr/bin/gcc                               \
+    pip install "cooler==$COOLER_VERSION"         \
                   cython                          \
                  "numpy$NUMPY_VERSION"            \
                  "scipy$SCIPY_VERSION"            \

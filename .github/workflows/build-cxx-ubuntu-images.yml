@@ -39,6 +39,7 @@ jobs:
           - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.55.*' }
           - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.55.*' }
           - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.55.*' }
+          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 23.04,  cmake: '3.25.*', conan: '1.55.*' }
 
     steps:
       - name: Checkout
@@ -119,6 +120,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-12:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-13:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-23.04-cxx-clang-15:latest" }
 
     container: ${{ matrix.image }}
 
