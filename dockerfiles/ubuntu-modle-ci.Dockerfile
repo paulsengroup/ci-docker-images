@@ -44,10 +44,11 @@ RUN apt-get update -q                             \
                           python3-dev             \
                           python3-pip             \
 &&  CC=/usr/bin/gcc                               \
+    pip install cython                            \
+                "numpy$NUMPY_VERSION"             \
+&&  CC=/usr/bin/gcc                               \
     pip install "cooler==$COOLER_VERSION"         \
-                  cython                          \
-                 "numpy$NUMPY_VERSION"            \
-                 "scipy$SCIPY_VERSION"            \
+                "scipy$SCIPY_VERSION"             \
 &&  pip uninstall -y cython                       \
 &&  apt-get remove -q -y gcc                      \
                          python3-dev              \
