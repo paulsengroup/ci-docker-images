@@ -44,6 +44,7 @@ RUN apt-get update -q                                    \
                           xz-utils                       \
                           zstd                           \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y "g++-${COMPILER_VERSION}"; fi \
+&&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "llvm-${COMPILER_VERSION}"; fi \
 &&  pip3 install "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}" \
 &&  apt-get remove -q -y python3-dev       \
@@ -73,6 +74,9 @@ RUN mkdir -p /opt/conan/profiles \
 &&  conan profile update settings.compiler.version="$COMPILER_VERSION" /opt/conan/profiles/default  \
 &&  conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default                    \
 &&  conan profile update settings.compiler.libcxx=libstdc++11 /opt/conan/profiles/default
+
+
+RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
 
 ENV CC=/usr/bin/cc
 ENV CXX=/usr/bin/c++
