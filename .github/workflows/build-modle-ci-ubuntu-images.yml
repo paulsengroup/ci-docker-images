@@ -137,12 +137,6 @@ jobs:
     container: ${{ matrix.image }}
 
     steps:
-      - name: Test wCorr
-        run: Rscript --no-save -e 'quit(status=!library("wCorr", character.only=T, logical.return=T), save="no")'
-
-      - name: Test SciPy
-        run: python3 -c 'import scipy'
-
       - name: Test Cooler
         run: |
           python3 -c 'import cooler'

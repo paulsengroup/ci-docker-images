@@ -49,11 +49,11 @@ RUN pip3 install --upgrade pip  \
 
 # Init conan profile
 RUN mkdir -p /opt/conan/profiles \
-&& conan config init                                                                               \
-&& conan profile new /opt/conan/profiles/default --detect --force                                  \
-&& conan profile update settings.compiler=gcc /opt/conan/profiles/default             \
-&& conan profile update settings.compiler.version=11 /opt/conan/profiles/default  \
-&& conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default                    \
+&& conan config init                                                                       \
+&& conan profile new /opt/conan/profiles/default --detect --force                          \
+&& conan profile update settings.compiler=gcc /opt/conan/profiles/default                  \
+&& conan profile update settings.compiler.version=11 /opt/conan/profiles/default           \
+&& conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default            \
 && conan profile update settings.compiler.libcxx=libstdc++11 /opt/conan/profiles/default
 
 ENV CC=/usr/bin/cc
