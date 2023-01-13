@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_OS
-
 FROM centos:7 AS base
 
 ENV CONAN_V2=1
@@ -21,9 +19,11 @@ RUN yum install -y centos-release-scl \
 && yum clean all --enablerepo='*'
 
 
-RUN update-alternatives --install /usr/bin/cc cc /opt/rh/devtoolset-11/root/usr/bin/gcc 100  \
-&& update-alternatives --install /usr/bin/c++ c++ /opt/rh/devtoolset-11/root/usr/bin/g++ 100 \
-&& update-alternatives --install /usr/bin/git git /opt/rh/rh-git227/root/usr/bin/git 100
+RUN update-alternatives --install /usr/bin/cc        cc  /opt/rh/devtoolset-11/root/usr/bin/gcc 100 \
+&& update-alternatives  --install /usr/bin/c++       c++ /opt/rh/devtoolset-11/root/usr/bin/g++ 100 \
+&& update-alternatives  --install /usr/local/bin/gcc gcc /opt/rh/devtoolset-11/root/usr/bin/gcc 100 \
+&& update-alternatives  --install /usr/local/bin/g++ g++ /opt/rh/devtoolset-11/root/usr/bin/g++ 100 \
+&& update-alternatives  --install /usr/bin/git       git /opt/rh/rh-git227/root/usr/bin/git     100
 
 ARG CCACHE_VERSION
 ARG CCACHE_SHA256
@@ -55,6 +55,11 @@ RUN mkdir -p /opt/conan/profiles \
 && conan profile update settings.compiler.version=11 /opt/conan/profiles/default           \
 && conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default            \
 && conan profile update settings.compiler.libcxx=libstdc++11 /opt/conan/profiles/default
+
+RUN cc --version
+RUN c++ --version
+RUN gcc --version
+RUN g++ --version
 
 ENV CC=/usr/bin/cc
 ENV CXX=/usr/bin/c++
