@@ -85,7 +85,7 @@ jobs:
 
       - name: Build Docker image and push to registries
         id: docker_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: ${{ github.event_name != 'pull_request' }}
           file: dockerfiles/ubuntu-cxx.Dockerfile
