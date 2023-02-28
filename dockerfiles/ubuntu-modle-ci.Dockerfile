@@ -12,8 +12,7 @@ ARG PIP_NO_CACHE_DIR=0
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 && echo CET | tee /etc/timezone > /dev/null
 
-ARG COOLER_VERSION='0.8.11'
-ARG NUMPY_VERSION='<1.24'
+ARG COOLER_VERSION='0.9.1'
 
 RUN apt-get update -q                             \
 &&  apt-get install -q -y --no-install-recommends \
@@ -23,7 +22,6 @@ RUN apt-get update -q                             \
                           python3-pip             \
 &&  CC=/usr/bin/gcc                               \
     pip install cython                            \
-                "numpy$NUMPY_VERSION"             \
 &&  CC=/usr/bin/gcc                               \
     pip install "cooler==$COOLER_VERSION"         \
 &&  pip uninstall -y cython                       \
