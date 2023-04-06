@@ -26,20 +26,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
+          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
 
-          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 22.04,  cmake: '3.25.*', conan: '1.58.*' }
-          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 23.04,  cmake: '3.25.*', conan: '1.58.*' }
+          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
 
     steps:
       - name: Checkout
@@ -128,7 +128,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-12:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-13:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-23.04-cxx-clang-15:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15:latest" }
 
     container: ${{ matrix.image }}
 

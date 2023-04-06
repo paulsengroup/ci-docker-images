@@ -42,7 +42,7 @@ jobs:
           - { compiler-name: clang, compiler-version: 12, os: 'ubuntu-22.04' }
           - { compiler-name: clang, compiler-version: 13, os: 'ubuntu-22.04' }
           - { compiler-name: clang, compiler-version: 14, os: 'ubuntu-22.04' }
-          - { compiler-name: clang, compiler-version: 15, os: 'ubuntu-23.04' }
+          - { compiler-name: clang, compiler-version: 15, os: 'ubuntu-22.04' }
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -140,7 +140,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-12:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-13:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-14:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-23.04-cxx-clang-15:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-15:latest" }
 
     container: ${{ matrix.image }}
 
