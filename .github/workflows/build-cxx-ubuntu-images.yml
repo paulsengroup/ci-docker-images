@@ -31,6 +31,7 @@ jobs:
           - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
           - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
           - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: gcc,   compiler-version: 13, os-name: ubuntu, os-version: 23.04,  cmake: '3.26.*', conan: '1.59.*' }
 
           - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
           - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
@@ -120,6 +121,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-10:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-11:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-12:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-23.04-cxx-gcc-13:latest" }
 
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-8:latest" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-9:latest" }
