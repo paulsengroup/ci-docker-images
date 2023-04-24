@@ -132,7 +132,9 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15" }
 
-    container: ${{ matrix.image }}:${{ needs.build-dockerfile.outputs.tag }}
+    container:
+      image: ${{ matrix.image }}:${{ needs.build-dockerfile.outputs.tag }}
+      options: "--user=root"
 
     steps:
       - name: Print distro information
