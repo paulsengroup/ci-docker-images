@@ -153,4 +153,7 @@ jobs:
       - name: Test Conan
         run: |
           printf '[requires]\nfmt/9.1.0' > conanfile.txt
-          conan install --build=fmt -pr "$CONAN_DEFAULT_PROFILE_PATH" conanfile.txt
+          conan install --build=missing \
+            -pr:b="$CONAN_DEFAULT_PROFILE_PATH" \
+            -pr:h="$CONAN_DEFAULT_PROFILE_PATH" \
+            conanfile.txt
