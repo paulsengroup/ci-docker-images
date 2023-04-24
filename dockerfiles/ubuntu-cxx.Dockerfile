@@ -6,11 +6,7 @@ ARG BASE_OS
 
 FROM $BASE_OS AS base
 
-ENV CONAN_V2=1
-ENV CONAN_REVISIONS_ENABLED=1
-ENV CONAN_NON_INTERACTIVE=1
 ENV CONAN_CMAKE_GENERATOR=Ninja
-
 ARG PIP_NO_CACHE_DIR=0
 
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
@@ -52,35 +48,41 @@ RUN apt-get update -q                                    \
 &&  apt-get autoremove -q -y               \
 &&  rm -rf /var/lib/apt/lists/*
 
+
 RUN if [ $COMPILER_NAME = gcc ] ; then \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
+    CC=gcc-$COMPILER_VERSION  \
+    CXX=g++-$COMPILER_VERSION \
+    conan profile detect --force                                                       \
+&&  mkdir -p /opt/conan/profiles                                                       \
+&&  mv "$HOME/.conan2/profiles/default" /opt/conan/profiles/default                    \
+&&  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100; \
 fi
 
+ENV CC=/usr/bin/cc
+ENV CXX=/usr/bin/c++
+ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
+
 RUN if [ $COMPILER_NAME = clang ] ; then \
-    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100       \
+    CC=clang-$COMPILER_VERSION    \
+    CXX=clang++-$COMPILER_VERSION \
+    conan profile detect --force                                                                  \
+&&  mkdir -p /opt/conan/profiles                                                                  \
+&&  mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"                             \
+&&  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100       \
 &&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100 \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$COMPILER_VERSION 100             \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100;        \
 fi
 
-
-RUN mkdir -p /opt/conan/profiles \
-&&  conan config init                                                                               \
-&&  conan profile new /opt/conan/profiles/default --detect --force                                  \
-&&  conan profile update settings.compiler="$COMPILER_NAME" /opt/conan/profiles/default             \
-&&  conan profile update settings.compiler.version="$COMPILER_VERSION" /opt/conan/profiles/default  \
-&&  conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default                    \
-&&  conan profile update settings.compiler.libcxx=libstdc++11 /opt/conan/profiles/default
+RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
+&&  echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
+&&  cat "$CONAN_DEFAULT_PROFILE_PATH"
 
 
 RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
-
-ENV CC=/usr/bin/cc
-ENV CXX=/usr/bin/c++
-ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
