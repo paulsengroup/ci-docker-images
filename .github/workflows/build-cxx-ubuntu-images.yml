@@ -20,26 +20,28 @@ defaults:
     shell: bash
 
 jobs:
-  build-ubuntu-image:
+  build-dockerfile:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.commit-date.outputs.date }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
 
-          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
-          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '1.59.*' }
+          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
+          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 22.04,  cmake: '3.26.*', conan: '2.0.*' }
 
     steps:
       - name: Checkout
@@ -108,29 +110,29 @@ jobs:
             CMAKE_VERSION=${{ matrix.cmake }}
             CONAN_VERSION=${{ matrix.conan }}
 
-  test-ubuntu-image:
-    needs: build-ubuntu-image
+  test-image:
+    needs: build-dockerfile
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-gcc-8:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-9:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-10:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-11:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-12:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-gcc-8" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-9" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-10" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-11" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-12" }
 
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-8:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-9:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-10:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-11:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-12:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-13:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-8" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-9" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-10" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-11" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-12" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-13" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15" }
 
-    container: ${{ matrix.image }}
+    container: ${{ matrix.image }}:${{ needs.build-dockerfile.outputs.tag }}
 
     steps:
       - name: Print distro information
@@ -149,4 +151,4 @@ jobs:
       - name: Test Conan
         run: |
           printf '[requires]\nfmt/9.1.0' > conanfile.txt
-          conan install --build=fmt -pr:b=/root/.conan/profiles/default conanfile.txt
+          conan install --build=fmt -pr "$CONAN_DEFAULT_PROFILE_PATH"
