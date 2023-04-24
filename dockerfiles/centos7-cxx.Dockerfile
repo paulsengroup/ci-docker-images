@@ -4,10 +4,6 @@
 
 FROM centos:7 AS base
 
-ENV CONAN_V2=1
-ENV CONAN_REVISIONS_ENABLED=1
-ENV CONAN_NON_INTERACTIVE=1
-
 ARG PIP_NO_CACHE_DIR=0
 
 # Install gcc-11, git-2.27 and python3
@@ -27,8 +23,8 @@ RUN update-alternatives --install /usr/bin/cc        cc  /opt/rh/devtoolset-11/r
 
 ARG CCACHE_VERSION
 ARG CCACHE_SHA256
-ARG CCACHE_VERSION="${CCACHE_VERSION:-4.7.4}"
-ARG CCACHE_SHA256="${CCACHE_SHA256:-0b700cc10884f7faf615203241d34eba7ebe0723f38f6aeb77569a556ff37313}"
+ARG CCACHE_VERSION="${CCACHE_VERSION:-4.8}"
+ARG CCACHE_SHA256="${CCACHE_SHA256:-b963ee3bf88d7266b8a0565e4ba685d5666357f0a7e364ed98adb0dc1191fcbb}"
 
 ARG CCACHE_URL="https://github.com/ccache/ccache/releases/download/v$CCACHE_VERSION/ccache-$CCACHE_VERSION-linux-x86_64.tar.xz"
 
@@ -45,16 +41,18 @@ RUN ccache --version
 # Install CMake and Conan
 RUN pip3 install --upgrade pip  \
 && pip3 install 'cmake>=3.20'   \
-                'conan>=1.53.0,<2'
+                'conan==2.0.*'
 
 # Init conan profile
 RUN mkdir -p /opt/conan/profiles \
-&& conan config init                                                                       \
-&& conan profile new /opt/conan/profiles/default --detect --force                          \
-&& conan profile update settings.compiler=gcc /opt/conan/profiles/default                  \
-&& conan profile update settings.compiler.version=11 /opt/conan/profiles/default           \
-&& conan profile update settings.compiler.cppstd=17 /opt/conan/profiles/default            \
-&& conan profile update settings.compiler.libcxx=libstdc++11 /opt/conan/profiles/default
+&& CC=gcc-$COMPILER_VERSION  \
+   CXX=g++-$COMPILER_VERSION \
+   conan profile detect --force                                      \
+&& mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH" \
+
+RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
+&& echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
+&& cat "$CONAN_DEFAULT_PROFILE_PATH"
 
 RUN cc --version
 RUN c++ --version
