@@ -49,12 +49,11 @@ ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 
 # Init conan profile
 RUN mkdir -p /opt/conan/profiles \
-&& CC=gcc-$COMPILER_VERSION  \
-   CXX=g++-$COMPILER_VERSION \
-   conan profile detect --force                                      \
-&& mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"
-
-RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
+&& CC=gcc  \
+   CXX=g++ \
+   conan profile detect --force                                        \
+&& mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"   \
+&& sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 && echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
 && cat "$CONAN_DEFAULT_PROFILE_PATH"
 
