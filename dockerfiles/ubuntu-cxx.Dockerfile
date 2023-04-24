@@ -29,7 +29,6 @@ RUN apt-get update -q                                    \
 &&  apt-get install -q -y --no-install-recommends        \
                           "$COMPILER"                    \
                           ccache                         \
-                          clang-tidy                     \
                           cppcheck                       \
                           git                            \
                           make                           \
@@ -39,8 +38,8 @@ RUN apt-get update -q                                    \
                           python3-pip                    \
                           xz-utils                       \
                           zstd                           \
-&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y "g++-${COMPILER_VERSION}"; fi \
-&&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "llvm-${COMPILER_VERSION}"; fi \
+&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}"; fi \
+&&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
 &&  pip3 install "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}" \
 &&  apt-get remove -q -y python3-dev       \
@@ -68,13 +67,14 @@ ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
     CXX=clang++-$COMPILER_VERSION \
-    conan profile detect --force                                                                  \
-&&  mkdir -p /opt/conan/profiles                                                                  \
-&&  mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"                             \
-&&  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100       \
-&&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100 \
-&&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$COMPILER_VERSION 100             \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100;        \
+    conan profile detect --force                                                                           \
+&&  mkdir -p /opt/conan/profiles                                                                           \
+&&  mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"                                      \
+&&  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100                \
+&&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100          \
+&&  update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$COMPILER_VERSION 100 \
+&&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$COMPILER_VERSION 100                      \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100;                 \
 fi
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
