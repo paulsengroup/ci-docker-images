@@ -43,12 +43,16 @@ RUN pip3 install --upgrade pip  \
 && pip3 install 'cmake>=3.20'   \
                 'conan==2.0.*'
 
+ENV CC=/usr/bin/cc
+ENV CXX=/usr/bin/c++
+ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
+
 # Init conan profile
 RUN mkdir -p /opt/conan/profiles \
 && CC=gcc-$COMPILER_VERSION  \
    CXX=g++-$COMPILER_VERSION \
    conan profile detect --force                                      \
-&& mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH" \
+&& mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 && echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
@@ -59,9 +63,6 @@ RUN c++ --version
 RUN gcc --version
 RUN g++ --version
 
-ENV CC=/usr/bin/cc
-ENV CXX=/usr/bin/c++
-ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 
 ENV LD_LIBRARY_PATH="/opt/rh/httpd24/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
