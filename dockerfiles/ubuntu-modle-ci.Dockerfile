@@ -14,33 +14,26 @@ RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 
 ARG COOLER_VERSION
 ARG PYBIGWIG_VERSION
+ARG PYTHON_VERSION
 ARG COOLER_VERSION="${COOLER_VERSION:-0.9.1}"
 ARG PYBIGWIG_VERSION="${PYBIGWIG_VERSION:-0.3.22}"
 
-RUN apt-get update -q                             \
-&&  apt-get install -q -y --no-install-recommends \
-                          gcc                     \
-                          python3-dev             \
-                          python3-pip             \
-                          python3-distutils       \
-                          zlib1g                  \
-                          zlib1g-dev              \
-&&  /opt/venv/bin/pip install --upgrade           \
-                pip                               \
-                setuptools                        \
-                wheel                             \
-&&  /opt/venv/bin/pip install                     \
-                "cooler==$COOLER_VERSION"         \
-                "pyBigWig==$PYBIGWIG_VERSION"     \
-&&  /opt/venv/bin/pip uninstall -y                \
-                pip                               \
-                wheel                             \
-&&  apt-get remove -q -y gcc                      \
-                         python3-dev              \
-                         python3-pip              \
-                         python3-distutils        \
-                         zlib1g-dev               \
-&&  apt-get autoremove -q -y                      \
+RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
+ARG PYTHON="python${PYTHON_VERSION}"
+
+RUN apt-get update -q                              \
+&&  apt-get install -q -y --no-install-recommends  \
+                          gcc                      \
+                          libpython$PYTHON_VERSION \
+                          ${PYTHON}-dev            \
+                          zlib1g-dev               \
+&&  /opt/venv/bin/pip install                      \
+                "cooler==$COOLER_VERSION"          \
+                "pyBigWig==$PYBIGWIG_VERSION"      \
+&&  apt-get remove -q -y gcc                       \
+                         zlib1g-dev                \
+                         ${PYTHON}-dev             \
+&&  apt-get autoremove -q -y                       \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN python3 -c 'import cooler, pyBigWig'

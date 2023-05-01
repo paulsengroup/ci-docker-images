@@ -33,20 +33,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { compiler-name: gcc,   compiler-version: 8,  os: 'ubuntu-20.04' }
-          - { compiler-name: gcc,   compiler-version: 9,  os: 'ubuntu-22.04' }
-          - { compiler-name: gcc,   compiler-version: 10, os: 'ubuntu-22.04' }
-          - { compiler-name: gcc,   compiler-version: 11, os: 'ubuntu-22.04' }
-          - { compiler-name: gcc,   compiler-version: 12, os: 'ubuntu-22.04' }
+          - { compiler-name: gcc,   compiler-version: 8,  os: 'ubuntu-20.04', python-version: 3.9  }
+          - { compiler-name: gcc,   compiler-version: 9,  os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: gcc,   compiler-version: 10, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: gcc,   compiler-version: 11, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: gcc,   compiler-version: 12, os: 'ubuntu-22.04', python-version: 3.11 }
 
-          - { compiler-name: clang, compiler-version: 8,  os: 'ubuntu-20.04' }
-          - { compiler-name: clang, compiler-version: 9,  os: 'ubuntu-20.04' }
-          - { compiler-name: clang, compiler-version: 10, os: 'ubuntu-20.04' }
-          - { compiler-name: clang, compiler-version: 11, os: 'ubuntu-22.04' }
-          - { compiler-name: clang, compiler-version: 12, os: 'ubuntu-22.04' }
-          - { compiler-name: clang, compiler-version: 13, os: 'ubuntu-22.04' }
-          - { compiler-name: clang, compiler-version: 14, os: 'ubuntu-22.04' }
-          - { compiler-name: clang, compiler-version: 15, os: 'ubuntu-22.04' }
+          - { compiler-name: clang, compiler-version: 8,  os: 'ubuntu-20.04', python-version: 3.9  }
+          - { compiler-name: clang, compiler-version: 9,  os: 'ubuntu-20.04', python-version: 3.9  }
+          - { compiler-name: clang, compiler-version: 10, os: 'ubuntu-20.04', python-version: 3.9  }
+          - { compiler-name: clang, compiler-version: 11, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: clang, compiler-version: 12, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: clang, compiler-version: 13, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: clang, compiler-version: 14, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: clang, compiler-version: 15, os: 'ubuntu-22.04', python-version: 3.11 }
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -123,6 +124,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             BASE_OS=${{ steps.generate-base-img-label.outputs.label }}
+            PYTHON_VERSION=${{ matrix.python-version }}
 
   test-ubuntu-image:
     needs: build-ubuntu-image
@@ -149,7 +151,15 @@ jobs:
     container: ${{ matrix.image }}
 
     steps:
+      - name: Test Python
+        run: |
+          python3 --version
+
       - name: Test Cooler
         run: |
           python3 -c 'import cooler'
           cooler --version
+
+      - name: Test pyBigWig
+        run: |
+          python3 -c 'import pyBigWig'
