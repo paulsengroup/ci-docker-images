@@ -12,7 +12,10 @@ ARG PIP_NO_CACHE_DIR=0
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 && echo CET | tee /etc/timezone > /dev/null
 
-ARG COOLER_VERSION='0.9.1'
+ARG COOLER_VERSION
+ARG PYBIGWIG_VERSION
+ARG COOLER_VERSION="${COOLER_VERSION:-0.9.1}"
+ARG PYBIGWIG_VERSION="${PYBIGWIG_VERSION:-0.3.22}"
 
 RUN apt-get update -q                             \
 &&  apt-get install -q -y --no-install-recommends \
@@ -20,18 +23,15 @@ RUN apt-get update -q                             \
                           python3                 \
                           python3-dev             \
                           python3-pip             \
-&&  CC=/usr/bin/gcc                               \
-    pip install cython                            \
-&&  CC=/usr/bin/gcc                               \
-    pip install "cooler==$COOLER_VERSION"         \
-&&  pip uninstall -y cython                       \
+&&  pip install "cooler==$COOLER_VERSION"         \
+                "pyBigWig==$PYBIGWIG_VERSION"     \
 &&  apt-get remove -q -y gcc                      \
                          python3-dev              \
                          python3-pip              \
 &&  apt-get autoremove -q -y                      \
 &&  rm -rf /var/lib/apt/lists/*
 
-RUN python3 -c 'import cooler'
+RUN python3 -c 'import cooler, pyBigWig'
 RUN cooler --version
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
