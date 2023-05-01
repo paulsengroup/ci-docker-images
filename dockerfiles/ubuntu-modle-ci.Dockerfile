@@ -20,12 +20,26 @@ ARG PYBIGWIG_VERSION="${PYBIGWIG_VERSION:-0.3.22}"
 RUN apt-get update -q                             \
 &&  apt-get install -q -y --no-install-recommends \
                           gcc                     \
+                          python3-dev             \
+                          python3-pip             \
                           python3-distutils       \
+                          zlib1g                  \
+                          zlib1g-dev              \
+&&  /opt/venv/bin/pip install --upgrade           \
+                pip                               \
+                setuptools                        \
+                wheel                             \
 &&  /opt/venv/bin/pip install                     \
                 "cooler==$COOLER_VERSION"         \
                 "pyBigWig==$PYBIGWIG_VERSION"     \
+&&  /opt/venv/bin/pip uninstall -y                \
+                pip                               \
+                wheel                             \
 &&  apt-get remove -q -y gcc                      \
+                         python3-dev              \
+                         python3-pip              \
                          python3-distutils        \
+                         zlib1g-dev               \
 &&  apt-get autoremove -q -y                      \
 &&  rm -rf /var/lib/apt/lists/*
 
