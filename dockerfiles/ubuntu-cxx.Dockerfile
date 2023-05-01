@@ -19,34 +19,46 @@ ARG COMPILER_VERSION
 ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
 
 ARG CONAN_VERSION
+ARG PYTHON_VERSION
 
 RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
 RUN if [ -z $COMPILER_NAME ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
 RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition" && exit 1; fi
 RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
+RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
 
-RUN apt-get update -q                                    \
-&&  apt-get install -q -y --no-install-recommends        \
-                          "$COMPILER"                    \
-                          ccache                         \
-                          cppcheck                       \
-                          git                            \
-                          make                           \
-                          ninja-build                    \
-                          python3                        \
-                          python3-venv                   \
-                          xz-utils                       \
-                          zstd                           \
+ARG PYTHON="python${PYTHON_VERSION}"
+
+RUN apt-get update -q                              \
+&&  apt-get install -q -y --no-install-recommends  \
+                          "$COMPILER"              \
+                          ccache                   \
+                          cppcheck                 \
+                          git                      \
+                          make                     \
+                          ninja-build              \
+                          ${PYTHON}                \
+                          ${PYTHON}-venv           \
+                          xz-utils                 \
+                          zstd                     \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}"; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
-&&  python3 -m venv /opt/venv --upgrade    \
-&&  /opt/venv/bin/pip install              \
-                 "cmake==${CMAKE_VERSION}" \
-                 "conan==${CONAN_VERSION}" \
-&&  apt-get remove -q -y python3-venv      \
-&&  apt-get autoremove -q -y               \
 &&  rm -rf /var/lib/apt/lists/*
 
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
+
+RUN python3 -m venv /opt/venv --upgrade    \
+&&  /opt/venv/bin/pip install --upgrade    \
+                pip                        \
+                setuptools                 \
+                wheel                      \
+&&  /opt/venv/bin/pip install              \
+                 "cmake==${CMAKE_VERSION}" \
+                 "conan==${CONAN_VERSION}"
+
+ENV CC=/usr/bin/cc
+ENV CXX=/usr/bin/c++
+ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
 
@@ -61,10 +73,6 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100; \
 fi
-
-ENV CC=/usr/bin/cc
-ENV CXX=/usr/bin/c++
-ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
