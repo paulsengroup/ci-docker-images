@@ -34,19 +34,20 @@ RUN apt-get update -q                                    \
                           make                           \
                           ninja-build                    \
                           python3                        \
-                          python3-dev                    \
-                          python3-pip                    \
+                          python3-venv                   \
                           xz-utils                       \
                           zstd                           \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}"; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
-&&  pip3 install "cmake==${CMAKE_VERSION}" \
+&&  python3 -m venv /opt/venv --upgrade    \
+&&  /opt/venv/bin/pip install              \
+                 "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}" \
-&&  apt-get remove -q -y python3-dev       \
-                         python3-pip       \
+&&  apt-get remove -q -y python3-venv      \
 &&  apt-get autoremove -q -y               \
 &&  rm -rf /var/lib/apt/lists/*
 
+ENV PATH="/opt/venv/bin:$PATH"
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     CC=gcc-$COMPILER_VERSION  \
