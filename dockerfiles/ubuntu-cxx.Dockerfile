@@ -48,6 +48,7 @@ RUN apt-get update -q                                    \
 &&  rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/opt/venv/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     CC=gcc-$COMPILER_VERSION  \
