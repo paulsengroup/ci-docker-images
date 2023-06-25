@@ -4,7 +4,7 @@
 
 ARG BASE_OS
 
-FROM $BASE_OS AS setup-repo
+FROM $BASE_OS AS update-apt-src
 RUN apt-get update \
 &&  apt-get install -y curl gnupg lsb-release
 
@@ -27,16 +27,19 @@ ARG PIP_NO_CACHE_DIR=0
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 &&  echo CET | tee /etc/timezone > /dev/null
 
-COPY --from=setup-repo /etc/apt/sources.list /etc/apt/sources.list
-COPY --from=setup-repo /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
 
-ARG CMAKE_VERSION
+RUN apt-get update -q                              \
+&&  apt-get install -q -y --no-install-recommends  \
+                          ca-certificates          \
+&&  rm -rf /var/lib/apt/lists/*
+
+COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
+COPY --from=update-apt-src /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
 
 ARG COMPILER_NAME
 ARG COMPILER_VERSION
 ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
 
-ARG CONAN_VERSION
 ARG PYTHON_VERSION
 
 RUN if [ -z $COMPILER_NAME ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
@@ -64,6 +67,9 @@ RUN apt-get update -q                              \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
+
+ARG CMAKE_VERSION
+ARG CONAN_VERSION
 
 RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
 RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
