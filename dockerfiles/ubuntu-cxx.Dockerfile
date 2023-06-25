@@ -4,13 +4,31 @@
 
 ARG BASE_OS
 
+FROM $BASE_OS AS setup-repo
+RUN apt-get update \
+&&  apt-get install -y curl gnupg lsb-release
+
+RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main" >> /etc/apt/sources.list
+RUN echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main" >> /etc/apt/sources.list
+RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-15 main" >> /etc/apt/sources.list
+RUN echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-15 main" >> /etc/apt/sources.list
+RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list
+RUN echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list
+
+RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
+&&  chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
+
+
 FROM $BASE_OS AS base
 
 ENV CONAN_CMAKE_GENERATOR=Ninja
 ARG PIP_NO_CACHE_DIR=0
 
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
-&& echo CET | tee /etc/timezone > /dev/null
+&&  echo CET | tee /etc/timezone > /dev/null
+
+COPY --from=setup-repo /etc/apt/sources.list /etc/apt/sources.list
+COPY --from=setup-repo /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
 
 ARG CMAKE_VERSION
 
@@ -21,15 +39,15 @@ ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
 ARG CONAN_VERSION
 ARG PYTHON_VERSION
 
-RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
 RUN if [ -z $COMPILER_NAME ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
 RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition" && exit 1; fi
-RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
 RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
 
 ARG PYTHON="python${PYTHON_VERSION}"
 
 RUN apt-get update -q                              \
+&&  apt-get install -y ca-certificates             \
+&&  apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
                           "$COMPILER"              \
                           ccache                   \
@@ -46,6 +64,9 @@ RUN apt-get update -q                              \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
+
+RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
+RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
 
 RUN python3 -m venv /opt/venv --upgrade    \
 &&  /opt/venv/bin/pip install --upgrade    \
