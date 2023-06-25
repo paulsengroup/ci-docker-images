@@ -43,7 +43,6 @@ jobs:
           - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.26.*', conan: '2.0.*' }
           - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.26.*', conan: '2.0.*' }
           - { compiler-name: clang, compiler-version: 16, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.26.*', conan: '2.0.*' }
-          - { compiler-name: clang, compiler-version: 17, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.26.*', conan: '2.0.*' }
 
     steps:
       - name: Checkout
@@ -135,7 +134,6 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-16" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-17" }
 
     container:
       image: ${{ matrix.image }}:${{ needs.build-dockerfile.outputs.tag }}
