@@ -62,8 +62,8 @@ RUN apt-get update -q                              \
                           ${PYTHON}-venv           \
                           xz-utils                 \
                           zstd                     \
-&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}"; fi \
-&&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
+&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}" lld; fi \
+&&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
@@ -98,7 +98,8 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100; \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100  \
+&&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld 100;                     \
 fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
@@ -111,7 +112,8 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
 &&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100          \
 &&  update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$COMPILER_VERSION 100 \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$COMPILER_VERSION 100                      \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100;                 \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100                  \
+&&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld-$COMPILER_VERSION 100;                       \
 fi
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
