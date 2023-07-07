@@ -120,6 +120,28 @@ RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 &&  echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
 &&  cat "$CONAN_DEFAULT_PROFILE_PATH"
 
+ARG MOLD_VERSION='1.11.0'
+ARG MOLD_X86_URL="https://github.com/rui314/mold/releases/download/v$MOLD_VERSION/mold-$MOLD_VERSION-x86_64-linux.tar.gz"
+ARG MOLD_X86_SHA256_STR="bf788940db4a9ac19e7745c821bf6ee18ff4d75441a803d84f86c9f3b0aa2a5e  mold-$MOLD_VERSION-x86_64-linux.tar.gz"
+ARG MOLD_ARM_URL="https://github.com/rui314/mold/releases/download/v$MOLD_VERSION/mold-$MOLD_VERSION-arm-linux.tar.gz"
+ARG MOLD_ARM_SHA256_STR="f9a57b03ddfe0d4259b8859cc5163dff313f4d706f07c88c9e3cfa2390e66e38  mold-$MOLD_VERSION-arm-linux.tar.gz"
+
+RUN apt-get update \
+&& apt-get install -q -y --no-install-recommends curl \
+&& cd /tmp \
+&& if [ $(uname -m) = x86_64 ] ; then \
+&& curl -LO "$MOLD_X86_URL" \
+&& echo "$MOLD_X86_SHA256_STR" >> mold.sha256; \
+else \
+&& curl -LO "$MOLD_ARM_URL" \
+&& echo "$MOLD_ARM_SHA256_STR" >> mold.sha256; \
+fi \
+&& sha256sum -c mold.sha256 \
+&& tar -xf "mold-$MOLD_VERSION"-*.tar.gz \
+       -C /usr/local \
+       --strip-components=1 \
+&& apt-get remove -y curl \
+&& rm -rf /tmp/mold* /var/lib/apt/lists/*
 
 RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
 
