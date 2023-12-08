@@ -38,6 +38,7 @@ jobs:
           - { compiler-name: gcc,   compiler-version: 10, os: 'ubuntu-22.04', python-version: 3.11 }
           - { compiler-name: gcc,   compiler-version: 11, os: 'ubuntu-22.04', python-version: 3.11 }
           - { compiler-name: gcc,   compiler-version: 12, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: gcc,   compiler-version: 13, os: 'ubuntu-23.04', python-version: 3.11 }
 
           - { compiler-name: clang, compiler-version: 8,  os: 'ubuntu-20.04', python-version: 3.9  }
           - { compiler-name: clang, compiler-version: 9,  os: 'ubuntu-20.04', python-version: 3.9  }
@@ -47,7 +48,7 @@ jobs:
           - { compiler-name: clang, compiler-version: 13, os: 'ubuntu-22.04', python-version: 3.11 }
           - { compiler-name: clang, compiler-version: 14, os: 'ubuntu-22.04', python-version: 3.11 }
           - { compiler-name: clang, compiler-version: 15, os: 'ubuntu-22.04', python-version: 3.11 }
-          - { compiler-name: clang, compiler-version: 16, os: 'ubuntu-22.04', python-version: 3.11 }
+          - { compiler-name: clang, compiler-version: 16, os: 'ubuntu-23.04', python-version: 3.11 }
 
     steps:
       - name: Checkout
@@ -139,6 +140,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-10:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-11:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-gcc-12:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-23.04-cxx-gcc-13:latest" }
 
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-20.04-cxx-clang-8:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-20.04-cxx-clang-9:latest" }
@@ -148,7 +150,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-13:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-14:latest" }
           - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-15:latest" }
-          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-22.04-cxx-clang-16:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/modle/ubuntu-23.04-cxx-clang-16:latest" }
 
     container: ${{ matrix.image }}
 
