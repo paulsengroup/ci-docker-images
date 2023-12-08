@@ -118,11 +118,16 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
 &&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld-$COMPILER_VERSION 100;                       \
 fi
 
+RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
+
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 &&  echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
 &&  cat "$CONAN_DEFAULT_PROFILE_PATH"
 
-RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
+RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/test.cpp \
+&& "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \
+&& /tmp/test \
+&& rm /tmp/test*
 
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
