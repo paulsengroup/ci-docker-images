@@ -10,8 +10,6 @@ RUN apt-get update \
 
 RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main" >> /etc/apt/sources.list
 RUN echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main" >> /etc/apt/sources.list
-RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-15 main" >> /etc/apt/sources.list
-RUN echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-15 main" >> /etc/apt/sources.list
 RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list
 RUN echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list
 RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main" >> /etc/apt/sources.list
@@ -28,12 +26,6 @@ ARG PIP_NO_CACHE_DIR=0
 
 RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
 &&  echo CET | tee /etc/timezone > /dev/null
-
-
-RUN apt-get update -q                              \
-&&  apt-get install -q -y --no-install-recommends  \
-                          ca-certificates          \
-&&  rm -rf /var/lib/apt/lists/*
 
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
 COPY --from=update-apt-src /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
@@ -66,6 +58,7 @@ RUN apt-get update -q                              \
                           zstd                     \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}" lld; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
+&&  if [ $COMPILER = clang-16 ] || [ $COMPILER = clang-17 ] ; then apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; fi \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
