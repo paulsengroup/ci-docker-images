@@ -6,16 +6,18 @@ ARG BASE_OS
 
 FROM $BASE_OS AS update-apt-src
 
+ARG BASE_OS
+
 RUN apt-get update \
 &&  apt-get install -y curl gnupg lsb-release
 
-RUN if [ ! $BASE_OS = ubuntu:20.04 ] ; then \
-    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    \
-&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" \
-&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main"     \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main" >> /etc/apt/sources.list; \
+RUN if [ "$BASE_OS" != 'ubuntu:20.04' ] ; then \
+    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main" >> /etc/apt/sources.list; \
 fi
 
 RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
