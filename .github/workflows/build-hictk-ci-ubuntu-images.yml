@@ -92,7 +92,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           build-args: |
-            PYTHON_VERSION=3.10
+            PYTHON_VERSION=3.11
 
   test-ubuntu-image:
     needs: build-ubuntu-image
