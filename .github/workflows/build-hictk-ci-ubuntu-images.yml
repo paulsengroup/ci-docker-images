@@ -1,0 +1,143 @@
+# Copyright (C) 2024 Roberto Rossini (roberros@uio.no)
+# SPDX-License-Identifier: MIT
+
+name: "Build Ubuntu Docker for hictk CI"
+on:
+  push:
+    branches: [ main, devel, ci-devel ]
+    paths:
+      - ".github/workflows/build-hictk-ci-ubuntu-images.yml"
+      - "dockerfiles/ubuntu-hictk-ci.Dockerfile"
+  pull_request:
+    branches: [ main, devel, ci-devel ]
+    paths:
+      - ".github/workflows/build-hictk-ci-ubuntu-images.yml"
+      - "dockerfiles/ubuntu-hictk-ci.Dockerfile"
+  workflow_run:
+    workflows: [ "Build Ubuntu Docker images for CXX development/testing" ]
+    branches: [ main, devel, ci-devel ]
+    types: [ completed ]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-ubuntu-image:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { compiler-name: clang, compiler-version: 17, os: 'ubuntu-22.04', python-version: 3.11 }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract commit author date
+        id: commit-date
+        run: |
+          cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
+          _date="$(date +%Y%m%d)"
+          
+          echo "commit_date=$cdate" >> $GITHUB_OUTPUT
+          echo "date=$_date" >> $GITHUB_OUTPUT
+
+      - name: Generate base image label
+        id: generate-base-img-label
+        run: |
+          label="ghcr.io/${{ github.repository }}/"
+          label+="${{ matrix.os }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}:latest"
+          
+          echo "label=$label" >> $GITHUB_OUTPUT
+
+      - name: Generate image name
+        id: generate-img-name
+        run: |
+          name="ghcr.io/${{ github.repository }}/hictk/"
+          name+="${{ matrix.os }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+          
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          os="${{ matrix.os }}"
+          compiler="${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+          
+          echo "key=hictk-ci-$os-$compiler" >> $GITHUB_OUTPUT
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ steps.generate-img-name.outputs.name }}
+          flavor: latest=true
+          tags: type=raw,value=${{ steps.commit-date.outputs.date }}
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
+
+      - name: Build Docker image and push to registries
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          push: ${{ github.event_name != 'pull_request' }}
+          file: dockerfiles/ubuntu-hictk-ci.Dockerfile
+          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
+          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            BASE_OS=${{ steps.generate-base-img-label.outputs.label }}
+            PYTHON_VERSION=${{ matrix.python-version }}
+
+  test-ubuntu-image:
+    needs: build-ubuntu-image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "ghcr.io/${{ github.repository }}/hictk/ubuntu-22.04-cxx-clang-17:latest" }
+
+    container: ${{ matrix.image }}
+
+    steps:
+      - name: Test Python
+        run: |
+          python3 --version
+
+      - name: Test Cooler
+        run: |
+          python3 -c 'import cooler'
+          cooler --version
+
+      - name: Test hictk
+        run: |
+          hictk --version
+
+      - name: Test xz
+        run: |
+          xz --version
