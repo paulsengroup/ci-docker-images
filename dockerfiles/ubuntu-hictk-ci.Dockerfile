@@ -8,8 +8,7 @@ ARG HICTK_VERSION="${HICTK_VERSION:-0.0.6}"
 FROM ghcr.io/paulsengroup/hictk:${HICTK_VERSION} as hictk
 
 ARG BASE_OS
-
-FROM $BASE_OS AS base
+FROM ubuntu:22.04 AS base
 
 ARG PIP_NO_CACHE_DIR=0
 
@@ -27,16 +26,25 @@ RUN apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
                           gcc                      \
                           libpython$PYTHON_VERSION \
+                          ${PYTHON}-venv           \
                           ${PYTHON}-dev            \
                           xz-utils                 \
                           zlib1g-dev               \
-&&  /opt/venv/bin/pip install                      \
-                "cooler==$COOLER_VERSION"          \
-&&  apt-get remove -q -y gcc                       \
-                         zlib1g-dev                \
-                         ${PYTHON}-dev             \
-&&  apt-get autoremove -q -y                       \
-&&  rm -rf /var/lib/apt/lists/*
+&& python3 -m venv /opt/venv --upgrade      \
+&& /opt/venv/bin/pip install --upgrade      \
+               pip                          \
+               setuptools                   \
+               wheel                        \
+&& /opt/venv/bin/pip install                \
+                "cooler==${COOLER_VERSION}" \
+&& apt-get remove -q -y gcc                 \
+                        zlib1g-dev          \
+                        ${PYTHON}-dev       \
+&& apt-get autoremove -q -y                 \
+&& rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
+ENV PATH="/opt/venv/bin:$PATH"
 
 COPY --from=hictk /usr/local/bin/hictk /usr/local/bin/
 

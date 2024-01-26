@@ -29,12 +29,6 @@ jobs:
       github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { compiler-name: clang, compiler-version: 17, os: 'ubuntu-22.04', python-version: 3.11 }
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,29 +42,17 @@ jobs:
           echo "commit_date=$cdate" >> $GITHUB_OUTPUT
           echo "date=$_date" >> $GITHUB_OUTPUT
 
-      - name: Generate base image label
-        id: generate-base-img-label
-        run: |
-          label="ghcr.io/${{ github.repository }}/"
-          label+="${{ matrix.os }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}:latest"
-          
-          echo "label=$label" >> $GITHUB_OUTPUT
-
       - name: Generate image name
         id: generate-img-name
         run: |
-          name="ghcr.io/${{ github.repository }}/hictk/"
-          name+="${{ matrix.os }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+          name="ghcr.io/${{ github.repository }}/hictk/ubuntu-22.04"
           
           echo "name=$name" >> $GITHUB_OUTPUT
 
       - name: Generate cache key
         id: cache-key
         run: |
-          os="${{ matrix.os }}"
-          compiler="${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
-          
-          echo "key=hictk-ci-$os-$compiler" >> $GITHUB_OUTPUT
+          echo "key=hictk-ci-ubuntu-22.04" >> $GITHUB_OUTPUT
 
       - name: Docker meta
         id: meta
@@ -110,8 +92,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           build-args: |
-            BASE_OS=${{ steps.generate-base-img-label.outputs.label }}
-            PYTHON_VERSION=${{ matrix.python-version }}
+            PYTHON_VERSION=3.10
 
   test-ubuntu-image:
     needs: build-ubuntu-image
@@ -120,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: "ghcr.io/${{ github.repository }}/hictk/ubuntu-22.04-cxx-clang-17:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/ci-docker-images/hictk/ubuntu-22.04:latest" }
 
     container: ${{ matrix.image }}
 
