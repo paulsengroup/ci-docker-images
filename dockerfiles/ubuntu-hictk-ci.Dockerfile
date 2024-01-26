@@ -25,7 +25,10 @@ ARG PYTHON="python${PYTHON_VERSION}"
 RUN apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
                           gcc                      \
+                          libasan8                 \
                           libpython$PYTHON_VERSION \
+                          libtsan2                 \
+                          libubsan1                \
                           ${PYTHON}-venv           \
                           ${PYTHON}-dev            \
                           xz-utils                 \
