@@ -101,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: "ghcr.io/${{ github.repository }}/ci-docker-images/hictk/ubuntu-22.04:latest" }
+          - { image: "ghcr.io/${{ github.repository }}/hictk/ubuntu-22.04:latest" }
 
     container: ${{ matrix.image }}
 
