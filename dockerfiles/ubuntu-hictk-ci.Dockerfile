@@ -30,6 +30,7 @@ RUN apt-get update -q                              \
                           ${PYTHON}-dev            \
                           xz-utils                 \
                           zlib1g-dev               \
+                          zstd                     \
 && python3 -m venv /opt/venv --upgrade      \
 && /opt/venv/bin/pip install --upgrade      \
                pip                          \
