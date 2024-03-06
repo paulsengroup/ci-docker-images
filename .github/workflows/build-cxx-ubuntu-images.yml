@@ -139,6 +139,7 @@ jobs:
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-16" }
           - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-17" }
+          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-18" }
 
     container:
       image: ${{ matrix.image }}:${{ needs.build-dockerfile.outputs.tag }}
