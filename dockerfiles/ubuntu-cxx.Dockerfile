@@ -65,7 +65,7 @@ RUN apt-get update -q                              \
                           zstd                     \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}" lld; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
-&&  if [ $COMPILER = clang-16 ] || [ $COMPILER = clang-17] || [ $COMPILER == clang-18 ] ; then apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; fi \
+&&  if [ $COMPILER = clang-16 ] || [ $COMPILER = clang-17 ] || [ $COMPILER = clang-18 ] ; then apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; fi \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
