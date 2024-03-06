@@ -59,6 +59,7 @@ RUN apt-get update -q                              \
                           git                      \
                           make                     \
                           ninja-build              \
+                          patch                    \
                           ${PYTHON}                \
                           ${PYTHON}-venv           \
                           xz-utils                 \
@@ -103,6 +104,12 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld 100;                     \
 fi
+
+COPY patches/conan-settings.patch /tmp/
+
+RUN conan --help \
+&&  patch -i /tmp/conan-settings.patch "$HOME/.conan2/settings.yml" \
+&&  rm /tmp/conan-settings.patch
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
