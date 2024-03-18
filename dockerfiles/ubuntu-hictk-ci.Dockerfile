@@ -29,6 +29,7 @@ RUN apt-get update -q                              \
                           libpython$PYTHON_VERSION \
                           libtsan2                 \
                           libubsan1                \
+                          pkg-config               \
                           ${PYTHON}-venv           \
                           ${PYTHON}-dev            \
                           xz-utils                 \
@@ -42,8 +43,9 @@ RUN apt-get update -q                              \
 && /opt/venv/bin/pip install                \
                 "cooler==${COOLER_VERSION}" \
 && apt-get remove -q -y gcc                 \
-                        zlib1g-dev          \
+                        pkg-config          \
                         ${PYTHON}-dev       \
+                        zlib1g-dev          \
 && apt-get autoremove -q -y                 \
 && rm -rf /var/lib/apt/lists/*
 
