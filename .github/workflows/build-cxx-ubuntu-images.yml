@@ -97,11 +97,54 @@ jobs:
           
           echo "key=ubuntu-cxx-$os-$compiler-$cmake_ver-$conan_ver" >> $GITHUB_OUTPUT
 
-      - name: Build Docker image and push to registries
-        id: docker_build
+      - name: Build Docker image (x86)
         uses: docker/build-push-action@v5
         with:
-          push: ${{ github.event_name != 'pull_request' }}
+          load: true
+          push: false
+          file: dockerfiles/ubuntu-cxx.Dockerfile
+          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
+          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
+          tags: tmp:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          build-args: |
+            BASE_OS=${{ matrix.os-name }}:${{ matrix.os-version }}
+            COMPILER_NAME=${{ matrix.compiler-name }}
+            COMPILER_VERSION=${{ matrix.compiler-version }}
+            CMAKE_VERSION=${{ matrix.cmake }}
+            CONAN_VERSION=${{ matrix.conan }}
+            PYTHON_VERSION=${{ matrix.python-version }}
+
+      - name: Test Docker image (x86)
+        run: |
+          test/test_docker_image.sh tmp:latest
+
+      - name: Build Docker image (arm64)
+        uses: docker/build-push-action@v5
+        with:
+          load: true
+          push: false
+          file: dockerfiles/ubuntu-cxx.Dockerfile
+          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
+          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
+          tags: tmp:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/arm64
+          build-args: |
+            BASE_OS=${{ matrix.os-name }}:${{ matrix.os-version }}
+            COMPILER_NAME=${{ matrix.compiler-name }}
+            COMPILER_VERSION=${{ matrix.compiler-version }}
+            CMAKE_VERSION=${{ matrix.cmake }}
+            CONAN_VERSION=${{ matrix.conan }}
+            PYTHON_VERSION=${{ matrix.python-version }}
+
+      - name: Push image to registries
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ github.workspace }}
+          push: true
           file: dockerfiles/ubuntu-cxx.Dockerfile
           cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
           cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
@@ -115,56 +158,3 @@ jobs:
             CMAKE_VERSION=${{ matrix.cmake }}
             CONAN_VERSION=${{ matrix.conan }}
             PYTHON_VERSION=${{ matrix.python-version }}
-
-  test-image:
-    needs: build-dockerfile
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-gcc-8" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-9" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-10" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-11" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-gcc-12" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-24.04-cxx-gcc-13" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-24.04-cxx-gcc-14" }
-
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-8" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-9" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-20.04-cxx-clang-10" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-11" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-12" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-13" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-14" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-15" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-16" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-17" }
-          - { image: "ghcr.io/${{ github.repository }}/ubuntu-22.04-cxx-clang-18" }
-
-    container:
-      image: ${{ matrix.image }}:${{ needs.build-dockerfile.outputs.tag }}
-      options: "--user=root"
-
-    steps:
-      - name: Print distro information
-        run: cat /etc/*-release
-
-      - name: Print compiler information
-        run: |
-          cc --version
-          c++ --version
-
-      - name: Print CMake information
-        run: |
-          which cmake
-          cmake --version
-
-      - name: Test Conan
-        run: |
-          printf '[requires]\nfmt/10.2.1' > conanfile.txt
-          conan install --build=missing \
-            -pr:b="$CONAN_DEFAULT_PROFILE_PATH" \
-            -pr:h="$CONAN_DEFAULT_PROFILE_PATH" \
-            conanfile.txt
