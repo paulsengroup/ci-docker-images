@@ -34,7 +34,7 @@ RUN apt-get update -q                              \
                           xz-utils                 \
                           zlib1g-dev               \
                           zstd                     \
-&& python3 -m venv /opt/venv --upgrade      \
+&& ${PYTHON} -m venv /opt/venv --upgrade    \
 && /opt/venv/bin/pip install --upgrade      \
                pip                          \
                setuptools                   \
