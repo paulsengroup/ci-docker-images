@@ -50,6 +50,11 @@ RUN apt-get update -q                              \
 && apt-get autoremove -q -y                 \
 && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update -q                              \
+&&  apt-get install -q -y --no-install-recommends  \
+                          libhdf5-dev              \
+&& rm -rf /var/lib/apt/lists/*
+
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
 ENV PATH="/opt/venv/bin:$PATH"
 
