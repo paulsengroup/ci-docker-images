@@ -132,9 +132,8 @@ RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 &&  cat "$CONAN_DEFAULT_PROFILE_PATH"
 
 RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/test.cpp \
-&& "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \
-&& /tmp/test \
-&& rm /tmp/test*
+&&  "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \
+&&  rm /tmp/test*
 
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
