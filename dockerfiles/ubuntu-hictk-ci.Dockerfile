@@ -8,7 +8,7 @@ ARG HICTK_VERSION="${HICTK_VERSION:-0.0.10}"
 FROM ghcr.io/paulsengroup/hictk:${HICTK_VERSION} as hictk
 
 ARG BASE_OS
-FROM ubuntu:23.04 AS base
+FROM ubuntu:24.04 AS base
 
 ARG PIP_NO_CACHE_DIR=0
 
