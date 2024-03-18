@@ -26,6 +26,7 @@ RUN apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
                           gcc                      \
                           libasan8                 \
+                          libhdf5-dev              \
                           libpython$PYTHON_VERSION \
                           libtsan2                 \
                           libubsan1                \
