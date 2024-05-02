@@ -8,14 +8,13 @@ FROM $BASE_OS AS base
 
 ARG BASE_OS
 ARG PIP_NO_CACHE_DIR=0
-
-RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
-&& echo CET | tee /etc/timezone > /dev/null
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
 ARG COOLER_VERSION
 ARG PYBIGWIG_VERSION
 ARG PYTHON_VERSION
-ARG COOLER_VERSION="${COOLER_VERSION:-0.9.1}"
+ARG COOLER_VERSION="${COOLER_VERSION:-0.9.3}"
 ARG PYBIGWIG_VERSION="${PYBIGWIG_VERSION:-0.3.22}"
 
 RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
