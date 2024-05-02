@@ -20,19 +20,21 @@ ARG PYBIGWIG_VERSION="${PYBIGWIG_VERSION:-0.3.22}"
 RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
 ARG PYTHON="python${PYTHON_VERSION}"
 
-RUN apt-get update -q                              \
-&&  apt-get install -q -y --no-install-recommends  \
-                          gcc                      \
-                          libpython$PYTHON_VERSION \
-                          ${PYTHON}-dev            \
-                          zlib1g-dev               \
-&&  /opt/venv/bin/pip install                      \
-                "cooler==$COOLER_VERSION"          \
-                "pyBigWig==$PYBIGWIG_VERSION"      \
-&&  apt-get remove -q -y gcc                       \
-                         zlib1g-dev                \
-                         ${PYTHON}-dev             \
-&&  apt-get autoremove -q -y                       \
+RUN apt-get update -q                                    \
+&&  apt-get install -q -y --no-install-recommends        \
+                          gcc                            \
+                          libhdf5-dev                    \
+                          libpython$PYTHON_VERSION       \
+                          ${PYTHON}-dev                  \
+                          zlib1g                         \
+                          zlib1g-dev                     \
+&& HDF5_DIR="$(printf /usr/lib/*-linux-gnu/hdf5/serial)" \
+   /opt/venv/bin/pip install                             \
+                "cooler==$COOLER_VERSION"                \
+                "pyBigWig==$PYBIGWIG_VERSION"            \
+&&  apt-get remove -q -y gcc                             \
+                         ${PYTHON}-dev                   \
+&&  apt-get autoremove -q -y                             \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN python3 -c 'import cooler, pyBigWig'
