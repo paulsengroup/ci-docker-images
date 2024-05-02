@@ -11,7 +11,7 @@ ARG BASE_OS
 RUN apt-get update \
 &&  apt-get install -y curl gnupg lsb-release
 
-RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] || [ "$BASE_OS" = 'ubuntu:24.04' ] ; then \
+RUN if [ "$BASE_OS" = 'ubuntu:22.04' ]  ; then \
     echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
@@ -65,7 +65,7 @@ RUN apt-get update -q                              \
                           zstd                     \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}" lld; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
-&&  if [ $COMPILER = clang-16 ] || [ $COMPILER = clang-17 ] || [ $COMPILER = clang-18 ] ; then apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; fi \
+&&  if [ $COMPILER = clang-14 ] || [ $COMPILER = clang-15 ] || [ $COMPILER = clang-16 ] || [ $COMPILER = clang-17 ] || [ $COMPILER = clang-18 ] ; then apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; fi \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
