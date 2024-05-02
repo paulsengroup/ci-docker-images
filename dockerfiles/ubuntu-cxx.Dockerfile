@@ -104,6 +104,8 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld 100;                     \
 fi
 
+COPY patches/conan-settings.patch /tmp/
+
 RUN conan --help \
 &&  patch -i /tmp/conan-settings.patch "$HOME/.conan2/settings.yml" \
 &&  rm /tmp/conan-settings.patch
