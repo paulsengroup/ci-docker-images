@@ -30,9 +30,8 @@ FROM $BASE_OS AS base
 
 ENV CONAN_CMAKE_GENERATOR=Ninja
 ARG PIP_NO_CACHE_DIR=0
-
-RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
-&&  echo CET | tee /etc/timezone > /dev/null
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
 COPY --from=update-apt-src /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
