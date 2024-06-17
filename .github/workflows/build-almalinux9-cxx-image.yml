@@ -61,7 +61,7 @@ jobs:
 
       - name: Build Docker image and push to registries
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: ${{ github.event_name != 'pull_request' }}
           file: dockerfiles/almalinux9-cxx.Dockerfile
