@@ -43,6 +43,7 @@ RUN apt-get update -q                              \
                wheel                        \
 && /opt/venv/bin/pip install                \
                 "cooler==${COOLER_VERSION}" \
+                "numpy<2"                   \
 && apt-get remove -q -y gcc                 \
                         pkg-config          \
                         ${PYTHON}-dev       \
