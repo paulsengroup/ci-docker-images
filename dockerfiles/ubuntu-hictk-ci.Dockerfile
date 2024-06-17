@@ -7,13 +7,11 @@ ARG HICTK_VERSION
 ARG HICTK_VERSION="${HICTK_VERSION:-0.0.10}"
 FROM ghcr.io/paulsengroup/hictk:${HICTK_VERSION} as hictk
 
-ARG BASE_OS
 FROM ubuntu:24.04 AS base
 
 ARG PIP_NO_CACHE_DIR=0
-
-RUN ln -snf /usr/share/zoneinfo/CET /etc/localtime \
-&& echo CET | tee /etc/timezone > /dev/null
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
 ARG COOLER_VERSION
 ARG PYTHON_VERSION
