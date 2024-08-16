@@ -42,6 +42,7 @@ RUN apt-get update -q                              \
 && /opt/venv/bin/pip install                \
                 "cooler==${COOLER_VERSION}" \
                 "numpy<2"                   \
+                "pyyaml"                    \
 && apt-get remove -q -y gcc                 \
                         pkg-config          \
                         ${PYTHON}-dev       \
