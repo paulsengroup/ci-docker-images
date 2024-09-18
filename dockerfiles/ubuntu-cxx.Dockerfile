@@ -11,7 +11,7 @@ ARG BASE_OS
 RUN apt-get update \
 &&  apt-get install -y curl gnupg lsb-release
 
-RUN if [ "$BASE_OS" = 'ubuntu:22.04' ]  ; then \
+RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ; then \
     echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
@@ -22,9 +22,11 @@ RUN if [ "$BASE_OS" = 'ubuntu:22.04' ]  ; then \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" >> /etc/apt/sources.list; \
 fi
 
-RUN \
+RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ||    \
+       [ "$BASE_OS" = 'ubuntu:24.04' ]; then \
     echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list; \
+fi
 
 RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
 &&  chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
@@ -103,19 +105,18 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
 
 
-COPY assets/settings.yml /opt/conan/
+
 
 # Populate Conan data
 RUN mkdir "$HOME/.conan2/" \
-&& ln -s /opt/conan/settings.yml "$HOME/.conan2/settings.yml" \
 && conan --help
+
+COPY assets/settings.yml /root/.conan2/settings.yml
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     CC=gcc-$COMPILER_VERSION  \
     CXX=g++-$COMPILER_VERSION \
     conan profile detect --force                                                       \
-&&  mkdir /opt/conan/profiles                                                          \
-&&  mv "$HOME/.conan2/profiles/default" /opt/conan/profiles/default                    \
 &&  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
@@ -128,8 +129,6 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
     CXX=clang++-$COMPILER_VERSION \
     conan profile detect --force                                                                           \
-&&  mkdir /opt/conan/profiles                                                                              \
-&&  mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"                                      \
 &&  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100                \
 &&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100          \
 &&  update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$COMPILER_VERSION 100 \
@@ -140,7 +139,7 @@ fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
 
-RUN ln -s "$CONAN_DEFAULT_PROFILE_PATH" "$HOME/.conan2/profiles/default"
+RUN ln -s "$HOME/.conan2/" /opt/conan
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 &&  echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
