@@ -105,8 +105,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
 
 
-
-
 # Populate Conan data
 RUN mkdir "$HOME/.conan2/" \
 && conan --help
