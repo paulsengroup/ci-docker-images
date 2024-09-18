@@ -22,6 +22,10 @@ RUN if [ "$BASE_OS" = 'ubuntu:22.04' ]  ; then \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" >> /etc/apt/sources.list; \
 fi
 
+RUN \
+    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list
+
 RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
 &&  chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
 
@@ -65,7 +69,14 @@ RUN apt-get update -q                              \
                           zstd                     \
 &&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}" lld; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
-&&  if [ $COMPILER = clang-14 ] || [ $COMPILER = clang-15 ] || [ $COMPILER = clang-16 ] || [ $COMPILER = clang-17 ] || [ $COMPILER = clang-18 ] ; then apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; fi \
+&&  if [ $COMPILER = clang-14 ] || \
+       [ $COMPILER = clang-15 ] || \
+       [ $COMPILER = clang-16 ] || \
+       [ $COMPILER = clang-17 ] || \
+       [ $COMPILER = clang-18 ] || \
+       [ $COMPILER = clang-19 ] ; then \
+    apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; \
+fi \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
@@ -91,11 +102,19 @@ ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
 
+
+COPY assets/settings.yml /opt/conan/
+
+# Populate Conan data
+RUN mkdir "$HOME/.conan2/" \
+&& ln -s /opt/conan/settings.yml "$HOME/.conan2/settings.yml" \
+&& conan --help
+
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     CC=gcc-$COMPILER_VERSION  \
     CXX=g++-$COMPILER_VERSION \
     conan profile detect --force                                                       \
-&&  mkdir -p /opt/conan/profiles                                                       \
+&&  mkdir /opt/conan/profiles                                                          \
 &&  mv "$HOME/.conan2/profiles/default" /opt/conan/profiles/default                    \
 &&  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
@@ -104,14 +123,12 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld 100;                     \
 fi
 
-# Populate Conan settings
-RUN conan --help
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
     CXX=clang++-$COMPILER_VERSION \
     conan profile detect --force                                                                           \
-&&  mkdir -p /opt/conan/profiles                                                                           \
+&&  mkdir /opt/conan/profiles                                                                              \
 &&  mv "$HOME/.conan2/profiles/default" "$CONAN_DEFAULT_PROFILE_PATH"                                      \
 &&  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100                \
 &&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100          \
@@ -122,6 +139,8 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
 fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
+
+RUN ln -s "$CONAN_DEFAULT_PROFILE_PATH" "$HOME/.conan2/profiles/default"
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 &&  echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \

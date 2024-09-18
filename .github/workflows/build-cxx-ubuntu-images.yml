@@ -47,6 +47,7 @@ jobs:
           - { compiler-name: clang, compiler-version: 16, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
           - { compiler-name: clang, compiler-version: 17, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
           - { compiler-name: clang, compiler-version: 18, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
+          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
 
     steps:
       - name: Checkout

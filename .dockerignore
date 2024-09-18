@@ -6,4 +6,4 @@
 **
 
 # Allowed files and directory
-!patches/conan-settings.patch
+!assets/
