@@ -116,9 +116,9 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
     CXX=g++-$COMPILER_VERSION \
     conan profile detect --force                                                       \
 &&  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++$COMPILER_VERSION 100   \
+&&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++$COMPILER_VERSION 100   \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld 100;                     \
 fi
 
