@@ -144,6 +144,9 @@ RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 
 RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/test.cpp \
 &&  "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \
+&&  if ldd /tmp/test | grep -qF 'not found'; then \
+       ldd /tmp/test; exit 1; \
+    fi \
 &&  rm /tmp/test*
 
 ARG BASE_OS
