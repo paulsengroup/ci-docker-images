@@ -17,6 +17,10 @@ on:
       - "dockerfiles/ubuntu-cxx.Dockerfile"
   workflow_dispatch:
 
+  schedule:
+    # Run weekly
+    - cron: "15 0 * * 0"
+
 defaults:
   run:
     shell: bash
