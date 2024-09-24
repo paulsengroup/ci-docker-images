@@ -59,7 +59,6 @@ RUN apt-get update -q                              \
 &&  apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
                           "$COMPILER"              \
-                          ccache                   \
                           cppcheck                 \
                           git                      \
                           make                     \
@@ -147,6 +146,42 @@ RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/t
 &&  "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \
 &&  rm /tmp/test*
 
+ARG BASE_OS
+
+FROM $BASE_OS AS ccache-builder
+
+ARG CCACHE_VER=4.10.2
+
+RUN apt-get update \
+&&  apt-get install -y \
+    cmake \
+    curl \
+    elfutils \
+    gcc \
+    g++ \
+    xz-utils
+
+RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
+
+RUN cmake -DCMAKE_BUILD_TYPE=Release \
+          -DENABLE_TESTING=ON \
+          -DREDIS_STORAGE_BACKEND=OFF \
+          -DDEPS=DOWNLOAD \
+          -DSTATIC_LINK=ON \
+          -DCMAKE_INSTALL_PREFIX=/tmp/ccache/ \
+          -S "ccache-$CCACHE_VER/" \
+          -B /tmp/build
+
+RUN cmake --build /tmp/build -j "$(nproc)"
+
+RUN cd /tmp/build/ \
+&&  ctest --output-on-failure -j "$(nproc)"
+
+RUN cmake --install /tmp/build
+
+FROM base as final
+
+COPY --from=ccache-builder /tmp/ccache/bin/ccache /usr/local/bin/ccache
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
