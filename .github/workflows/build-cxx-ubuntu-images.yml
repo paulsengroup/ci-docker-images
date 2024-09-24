@@ -7,11 +7,13 @@ on:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-cxx-ubuntu-images.yml"
+      - "assets/settings.yml"
       - "dockerfiles/ubuntu-cxx.Dockerfile"
   pull_request:
     branches: [ main, devel, ci-devel ]
     paths:
       - ".github/workflows/build-cxx-ubuntu-images.yml"
+      - "assets/settings.yml"
       - "dockerfiles/ubuntu-cxx.Dockerfile"
   workflow_dispatch:
 
