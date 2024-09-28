@@ -113,28 +113,29 @@ COPY assets/settings.yml /root/.conan2/settings.yml
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     CC=gcc-$COMPILER_VERSION  \
     CXX=g++-$COMPILER_VERSION \
-    conan profile detect --force                                                       \
-&&  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$COMPILER_VERSION 100    \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld 100;                     \
+    conan profile detect --force                                                          \
+&&  update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-$COMPILER_VERSION  100  \
+&&  update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-$COMPILER_VERSION  100  \
+&&  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-$COMPILER_VERSION  100  \
+&&  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-$COMPILER_VERSION  100  \
+&&  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-$COMPILER_VERSION 100  \
+&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld                    100; \
 fi
 
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
     CXX=clang++-$COMPILER_VERSION \
-    conan profile detect --force                                                                           \
-&&  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$COMPILER_VERSION 100                \
-&&  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$COMPILER_VERSION 100          \
-&&  update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$COMPILER_VERSION 100 \
-&&  update-alternatives --install /usr/bin/cc cc /usr/bin/clang-$COMPILER_VERSION 100                      \
-&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100                  \
-&&  update-alternatives --install /usr/bin/ld ld /usr/bin/lld-$COMPILER_VERSION 100;                       \
+    conan profile detect --force                                                                                           \
+&&  update-alternatives --install /usr/bin/clang           clang           /usr/bin/clang-$COMPILER_VERSION           100  \
+&&  update-alternatives --install /usr/bin/clang++         clang++         /usr/bin/clang++-$COMPILER_VERSION         100  \
+&&  update-alternatives --install /usr/bin/clang-tidy      clang-tidy      /usr/bin/clang-tidy-$COMPILER_VERSION      100  \
+&&  update-alternatives --install /usr/bin/cc              cc              /usr/bin/clang-$COMPILER_VERSION           100  \
+&&  update-alternatives --install /usr/bin/c++             c++             /usr/bin/clang++-$COMPILER_VERSION         100  \
+&&  update-alternatives --install /usr/bin/llvm-cov        llvm-cov        /usr/bin/llvm-cov-$COMPILER_VERSION        100  \
+&&  update-alternatives --install /usr/bin/llvm-symbolizer llvm-symbolizer /usr/bin/llvm-symbolizer-$COMPILER_VERSION 100  \
+&&  update-alternatives --install /usr/bin/ld              ld              /usr/bin/lld-$COMPILER_VERSION             100; \
 fi
-
-RUN if [ $COMPILER_NAME = clang ] ; then ln -sf "/usr/bin/llvm-symbolizer-${COMPILER_VERSION}" /usr/local/bin/llvm-symbolizer; fi
 
 RUN ln -s "$HOME/.conan2/" /opt/conan
 
