@@ -8,13 +8,11 @@ FROM $BASE_OS AS update-apt-src
 
 ARG BASE_OS
 
-RUN apt-get update \
+RUN apt-get update -q \
 &&  apt-get install -y curl gnupg lsb-release
 
 RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ; then \
-    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
-&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
+    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main" >> /etc/apt/sources.list  \
@@ -22,11 +20,10 @@ RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ; then \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" >> /etc/apt/sources.list; \
 fi
 
-RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ||    \
-       [ "$BASE_OS" = 'ubuntu:24.04' ]; then \
-    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list; \
-fi
+RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list
 
 RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
 &&  chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
@@ -54,7 +51,7 @@ RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && 
 
 ARG PYTHON="python${PYTHON_VERSION}"
 
-RUN apt-get update -q                              \
+RUN apt-get update -q || true                      \
 &&  apt-get install -y ca-certificates             \
 &&  apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
@@ -64,11 +61,11 @@ RUN apt-get update -q                              \
                           make                     \
                           ninja-build              \
                           patch                    \
-                          ${PYTHON}                \
-                          ${PYTHON}-venv           \
+                          "${PYTHON}"              \
+                          "${PYTHON}-venv"         \
                           xz-utils                 \
                           zstd                     \
-&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy "g++-${COMPILER_VERSION}" lld; fi \
+&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy-19 "g++-${COMPILER_VERSION}" lld-19; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
 &&  if [ $COMPILER = clang-14 ] || \
        [ $COMPILER = clang-15 ] || \
@@ -119,22 +116,20 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld                    100; \
+&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-19                 100; \
 fi
 
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
     CXX=clang++-$COMPILER_VERSION \
-    conan profile detect --force                                                                                           \
-&&  update-alternatives --install /usr/bin/clang           clang           /usr/bin/clang-$COMPILER_VERSION           100  \
-&&  update-alternatives --install /usr/bin/clang++         clang++         /usr/bin/clang++-$COMPILER_VERSION         100  \
-&&  update-alternatives --install /usr/bin/clang-tidy      clang-tidy      /usr/bin/clang-tidy-$COMPILER_VERSION      100  \
-&&  update-alternatives --install /usr/bin/cc              cc              /usr/bin/clang-$COMPILER_VERSION           100  \
-&&  update-alternatives --install /usr/bin/c++             c++             /usr/bin/clang++-$COMPILER_VERSION         100  \
-&&  update-alternatives --install /usr/bin/llvm-cov        llvm-cov        /usr/bin/llvm-cov-$COMPILER_VERSION        100  \
-&&  update-alternatives --install /usr/bin/llvm-symbolizer llvm-symbolizer /usr/bin/llvm-symbolizer-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld              ld              /usr/bin/lld-$COMPILER_VERSION             100; \
+    conan profile detect --force; \
+    for bin in /usr/bin/clang* /usr/bin/llvm*; do \
+      update-alternatives --install "${bin%-$COMPILER_VERSION}" "$(basename "$bin" "-$COMPILER_VERSION")" "$bin" 100; \
+    done; \
+    update-alternatives --install /usr/bin/cc  cc  /usr/bin/clang-$COMPILER_VERSION   100  \
+&&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100  \
+&&  update-alternatives --install /usr/bin/ld  ld  /usr/bin/lld-$COMPILER_VERSION     100; \
 fi
 
 RUN ln -s "$HOME/.conan2/" /opt/conan
@@ -156,18 +151,25 @@ FROM $BASE_OS AS ccache-builder
 
 ARG CCACHE_VER=4.10.2
 
-RUN apt-get update \
+COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
+COPY --from=update-apt-src /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
+
+RUN apt-get update -q || true \
+&&  apt-get install -y ca-certificates \
+&&  apt-get update -q \
 &&  apt-get install -y \
     cmake \
     curl \
     elfutils \
-    gcc \
-    g++ \
+    clang-19 \
+    clang++-19 \
     xz-utils
 
 RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=clang-19 \
+          -DCMAKE_CXX_COMPILER=clang++-19 \
           -DENABLE_TESTING=ON \
           -DREDIS_STORAGE_BACKEND=OFF \
           -DDEPS=DOWNLOAD \
