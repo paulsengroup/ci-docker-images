@@ -34,30 +34,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: gcc,   compiler-version: 13, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: gcc,   compiler-version: 14, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
+          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: gcc,   compiler-version: 13, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: gcc,   compiler-version: 14, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
 
-          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 16, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 17, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 18, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
+          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 16, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 17, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 18, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
 
 
-          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.7.*' }
-          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.7.*' }
+          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.30.*', conan: '2.8.*' }
+          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.30.*', conan: '2.8.*' }
 
     steps:
       - name: Checkout
