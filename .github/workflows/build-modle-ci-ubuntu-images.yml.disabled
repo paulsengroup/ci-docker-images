@@ -22,12 +22,19 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   build-ubuntu-image:
     runs-on: ubuntu-latest
     if: |
       github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
+
+    permissions:
+      contents: read
+      packages: write
 
     strategy:
       fail-fast: false

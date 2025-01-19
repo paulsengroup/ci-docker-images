@@ -25,6 +25,10 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   matrix-factory:
     name: Generate job matrix
