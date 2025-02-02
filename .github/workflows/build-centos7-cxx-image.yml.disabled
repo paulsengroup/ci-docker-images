@@ -31,7 +31,7 @@ jobs:
         run: |
           cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
           _date="$(date +%Y%m%d)"
-          
+
           echo "commit_date=$cdate" >> $GITHUB_OUTPUT
           echo "date=$_date" >> $GITHUB_OUTPUT
 
