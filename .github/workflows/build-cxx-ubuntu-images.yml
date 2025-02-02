@@ -26,59 +26,206 @@ defaults:
     shell: bash
 
 jobs:
-  build-dockerfile:
+  matrix-factory:
+    name: Generate job matrix
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.commit-date.outputs.date }}
+      matrix: ${{ steps.generate-matrix.outputs.result }}
+    steps:
+      - name: Generate matrix
+        id: generage-matrix
+        shell: python
+        run: |
+          import json
+          import os
+          import sys
+
+
+          os_name = "ubuntu"
+          cmake_version = "3.31.*"
+          conan_version = "2.9.*"
+
+          templates = (
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 8,
+                  "os-version": "20.04",
+                  "python-version": "3.9",
+              },
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 9,
+                  "os-version": "22.04",
+                  "python-version": "3.11",
+              },
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 10,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 11,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 12,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 13,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "gcc",
+                  "compiler-version": 14,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 8,
+                  "os-version": "20.04",
+                  "python-version": "3.9",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 9,
+                  "os-version": "20.04",
+                  "python-version": "3.9",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 10,
+                  "os-version": "20.04",
+                  "python-version": "3.9",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 11,
+                  "os-version": "22.04",
+                  "python-version": "3.11",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 12,
+                  "os-version": "22.04",
+                  "python-version": "3.11",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 13,
+                  "os-version": "22.04",
+                  "python-version": "3.11",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 14,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 15,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 16,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 17,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 18,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 19,
+                  "os-version": "20.04",
+                  "python-version": "3.9",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 19,
+                  "os-version": "22.04",
+                  "python-version": "3.11",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 19,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+          )
+
+          includes = []
+
+          for t in templates:
+              t |= {"os-name": os_name, "cmake-version": cmake_version, "conan-version": conan_version}
+              includes.append(t | {"runner": "ubuntu-24.04",     "platform": "linux/amd64"})
+              includes.append(t | {"runner": "ubuntu-24.04-arm", "platform": "linux/arm64"})
+
+          with open(os.environ.get("GITHUB_OUTPUT"), "a") as f:
+            for fp in (sys.stdout, f):
+              json.dump(
+                  {"include": includes},
+                  fp=fp,
+                  indent=2,
+                  sort_keys=True,
+              )
+
+  build-dockerfile:
+    needs: [matrix-factory]
+    outputs:
+      image:
+        description: "Name of the image built by the workflow"
+        value: ${{ steps.metadata.outputs.image }}
+      tag:
+        description: "Tag for the version of the image built by the workflow"
+        value: ${{ steps.metadata.outputs.build-date }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - { compiler-name: gcc,   compiler-version: 8,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: gcc,   compiler-version: 9,  os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: gcc,   compiler-version: 10, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: gcc,   compiler-version: 11, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: gcc,   compiler-version: 12, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: gcc,   compiler-version: 13, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: gcc,   compiler-version: 14, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-
-          - { compiler-name: clang, compiler-version: 8,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 9,  os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 10, os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 11, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 12, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 13, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 14, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 15, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 16, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 17, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 18, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
-
-
-          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 20.04, python-version: 3.9,  cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 22.04, python-version: 3.11, cmake: '3.31.*', conan: '2.9.*' }
-          - { compiler-name: clang, compiler-version: 19, os-name: ubuntu, os-version: 24.04, python-version: 3.12, cmake: '3.31.*', conan: '2.9.*' }
+      matrix: ${{ fromJson(needs.matrix-factory.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract commit author date
-        id: commit-date
+      - name: Extract metadata
+        id: metadata
         run: |
           cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
           _date="$(date +%Y%m%d)"
+          image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}'
 
-          echo "commit_date=$cdate" >> $GITHUB_OUTPUT
-          echo "date=$_date" >> $GITHUB_OUTPUT
+          echo "commit-date=$cdate" | tee -a "$GITHUB_OUTPUT"
+          echo "build-date=$_date" | tee -a "$GITHUB_OUTPUT"
+          echo "image=$image" | tee -a "$GITHUB_OUTPUT"
 
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}
+          images: ${{ steps.metadata.outputs.image }}
           flavor: latest=true
-          tags: type=raw,value=${{ steps.commit-date.outputs.date }}
+          tags: type=raw,value=${{ steps.metadata.outputs.build-date }}
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
@@ -90,82 +237,129 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - name: Generate cache key
-        id: cache-key
-        run: |
-          os="ubuntu:${{ matrix.os-version }}"
-          compiler="${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
-          cmake_ver="cmake-${{ matrix.cmake }}"
-          conan_ver="conan-${{ matrix.conan }}"
-
-          echo "key=ubuntu-cxx-$os-$compiler-$cmake_ver-$conan_ver" >> $GITHUB_OUTPUT
-
-      - name: Build Docker image (x86)
+      - name: Build Docker image
         uses: docker/build-push-action@v6
+        id: build-image
         with:
           load: true
           push: false
           file: dockerfiles/ubuntu-cxx.Dockerfile
-          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
-          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
-          tags: tmp:latest
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
+          tags: tmp:latest
           build-args: |
             BASE_OS=${{ matrix.os-name }}:${{ matrix.os-version }}
             COMPILER_NAME=${{ matrix.compiler-name }}
             COMPILER_VERSION=${{ matrix.compiler-version }}
-            CMAKE_VERSION=${{ matrix.cmake }}
-            CONAN_VERSION=${{ matrix.conan }}
+            CMAKE_VERSION=${{ matrix.cmake-version }}
+            CONAN_VERSION=${{ matrix.conan-version }}
             PYTHON_VERSION=${{ matrix.python-version }}
 
-      - name: Test Docker image (x86)
-        run: |
-          test/test_docker_image.sh tmp:latest
-
-      - name: Build Docker image (arm64)
-        uses: docker/build-push-action@v6
-        with:
-          load: true
-          push: false
-          file: dockerfiles/ubuntu-cxx.Dockerfile
-          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
-          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
-          tags: tmp:latest
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/arm64
-          build-args: |
-            BASE_OS=${{ matrix.os-name }}:${{ matrix.os-version }}
-            COMPILER_NAME=${{ matrix.compiler-name }}
-            COMPILER_VERSION=${{ matrix.compiler-version }}
-            CMAKE_VERSION=${{ matrix.cmake }}
-            CONAN_VERSION=${{ matrix.conan }}
-            PYTHON_VERSION=${{ matrix.python-version }}
+      - name: Test Docker image
+        run: test/test_docker_image.sh tmp:latest
 
       - name: Push image to registries
         if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v6
+        id: push-image
         with:
           context: ${{ github.workspace }}
           push: true
           file: dockerfiles/ubuntu-cxx.Dockerfile
-          cache-from: type=gha,scope=${{ steps.cache-key.outputs.key }}
-          cache-to: type=gha,mode=min,scope=${{ steps.cache-key.outputs.key }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,"name=${{ steps.metadata.outputs.image }}",push-by-digest=true,name-canonical=true,push=true
           build-args: |
             BASE_OS=${{ matrix.os-name }}:${{ matrix.os-version }}
             COMPILER_NAME=${{ matrix.compiler-name }}
             COMPILER_VERSION=${{ matrix.compiler-version }}
-            CMAKE_VERSION=${{ matrix.cmake }}
-            CONAN_VERSION=${{ matrix.conan }}
+            CMAKE_VERSION=${{ matrix.cmake-version }}
+            CONAN_VERSION=${{ matrix.conan-version }}
             PYTHON_VERSION=${{ matrix.python-version }}
+
+      - name: Export digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.push-image.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Normalize platform name
+        if: github.event_name != 'pull_request'
+        id: normalize-platform
+        run: |
+          echo 'platform=${{ matrix.platform }}' |
+            sed 's|/|-|g' |
+            tee -a $GITHUB_OUTPUT
+
+      - name: Upload digest
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ steps.normalize-platform.outputs.platform }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-images:
+    runs-on: ubuntu-latest
+    needs: [build-dockerfile]
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ needs.build-dockerfile.outputs.image }}
+          tags: ${{ needs.build-dockerfile.outputs.tag }}
+
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          # https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ needs.build-dockerfile.outputs.image }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: docker buildx imagetools inspect ${{ needs.build-dockerfile.outputs.image }}:${{ steps.meta.outputs.version }}
+
+
+  build-cxx-ubuntu-images-status-check:
+    name: Status Check (Build Ubuntu Docker images for CXX development/testing)
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs:
+      - matrix-factory
+      - build-dockerfile
+      - merge-images
+
+    steps:
+      - name: Collect job results
+        if: |
+          needs.matrix-factory.result != 'success'   ||
+          needs.build-dockerfile.result != 'success' ||
+          (
+            needs.merge-images.result != 'success'   &&
+            needs.merge-images.result != 'skipped'
+          )
+        run: exit 1
