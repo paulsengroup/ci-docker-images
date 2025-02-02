@@ -34,10 +34,12 @@ jobs:
     name: Generate job matrix
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.generate-matrix.outputs.result }}
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+      matrix-amd64: ${{ steps.generate-matrix.outputs.matrix-amd64 }}
+      matrix-arm64: ${{ steps.generate-matrix.outputs.matrix-arm64 }}
     steps:
       - name: Generate matrix
-        id: generage-matrix
+        id: generate-matrix
         shell: python
         run: |
           import json
@@ -178,31 +180,62 @@ jobs:
               },
           )
 
-          includes = []
+          includes_amd64 = []
+          includes_arm64 = []
 
           for t in templates:
               t |= {"os-name": os_name, "cmake-version": cmake_version, "conan-version": conan_version}
-              includes.append(t | {"runner": "ubuntu-24.04",     "platform": "linux/amd64"})
-              includes.append(t | {"runner": "ubuntu-24.04-arm", "platform": "linux/arm64"})
+              includes_amd64.append(t | {"runner": "ubuntu-24.04",     "platform": "linux/amd64"})
+              includes_arm64.append(t | {"runner": "ubuntu-24.04-arm", "platform": "linux/arm64"})
 
-          with open(os.environ.get("GITHUB_OUTPUT"), "a") as f:
-            for fp in (sys.stdout, f):
-              json.dump(
-                  {"include": includes},
-                  fp=fp,
-                  indent=2,
+          includes = includes_amd64 + includes_arm64
+
+          json.dump(
+              {"include": includes},
+              fp=sys.stdout,
+              indent=2,
+              sort_keys=True,
+          )
+
+          def write_output(key, data, f):
+              data = json.dumps(
+                  {"include": data},
                   sort_keys=True,
               )
+              print(f"{key}={data}", file=f)
+
+          with open(os.environ.get("GITHUB_OUTPUT"), "a") as f:
+              write_output("matrix-amd64", includes_amd64, f)
+              write_output("matrix-arm64", includes_arm64, f)
+              write_output("matrix", includes, f)
+
+  generate-tags:
+    name: Generate Image tags
+    runs-on: ubuntu-latest
+    outputs:
+      commit-date: ${{ steps.metadata.outputs.commit-date }}
+      build-date: ${{ steps.metadata.outputs.build-date }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract metadata
+        id: metadata
+        run: |
+          commit_date="$(git show -s --format='%as' HEAD | tr -d '-')"
+          build_date="$(date +%Y%m%d)"
+
+          echo "commit-date=$commit_date" | tee -a "$GITHUB_OUTPUT"
+          echo "build-date=$build_date" | tee -a "$GITHUB_OUTPUT"
 
   build-dockerfile:
-    needs: [matrix-factory]
+    name: Build Dockerfile
+    needs:
+      - matrix-factory
+      - generate-tags
     outputs:
-      image:
-        description: "Name of the image built by the workflow"
-        value: ${{ steps.metadata.outputs.image }}
-      tag:
-        description: "Tag for the version of the image built by the workflow"
-        value: ${{ steps.metadata.outputs.build-date }}
+      image: ${{ steps.metadata.outputs.image }}
+      tag: ${{ steps.metadata.outputs.build-date }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.matrix-factory.outputs.matrix) }}
@@ -215,12 +248,10 @@ jobs:
       - name: Extract metadata
         id: metadata
         run: |
-          cdate="$(git show -s --format='%as' HEAD | tr -d '-')"
-          _date="$(date +%Y%m%d)"
           image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}'
 
-          echo "commit-date=$cdate" | tee -a "$GITHUB_OUTPUT"
-          echo "build-date=$_date" | tee -a "$GITHUB_OUTPUT"
+          echo "commit-date=${{ needs.generate-tags.outputs.commit-date }}" | tee -a "$GITHUB_OUTPUT"
+          echo "build-date=${{ needs.generate-tags.outputs.build-date }}" | tee -a "$GITHUB_OUTPUT"
           echo "image=$image" | tee -a "$GITHUB_OUTPUT"
 
       - name: Docker meta
@@ -271,7 +302,6 @@ jobs:
           context: ${{ github.workspace }}
           push: true
           file: dockerfiles/ubuntu-cxx.Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
           outputs: type=image,"name=${{ steps.metadata.outputs.image }}",push-by-digest=true,name-canonical=true,push=true
@@ -290,37 +320,54 @@ jobs:
           digest="${{ steps.push-image.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
-      - name: Normalize platform name
+      - name: Generate artifact name
         if: github.event_name != 'pull_request'
-        id: normalize-platform
+        id: generate-artifact-name
         run: |
-          echo 'platform=${{ matrix.platform }}' |
-            sed 's|/|-|g' |
+          echo 'name=${{ steps.metadata.outputs.image }}-${{ matrix.platform }}' |
+            sed 's|[^[:alnum:]=-]\+|-|g' |
             tee -a $GITHUB_OUTPUT
 
       - name: Upload digest
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ steps.normalize-platform.outputs.platform }}
+          name: digests-${{ steps.generate-artifact-name.outputs.name }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
 
   merge-images:
+    name: Merge images
     runs-on: ubuntu-latest
-    needs: [build-dockerfile]
+    needs:
+      - matrix-factory
+      - generate-tags
+      - build-dockerfile
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.matrix-factory.outputs.matrix-amd64) }}
     if: github.event_name != 'pull_request'
     steps:
+      - name: Collect metadata
+        id: metadata
+        run: |
+          image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}'
+          artifact_name="$(echo "$image" | sed 's|[^[:alnum:]=-]\+|-|g')"
+          tags='${{ needs.generate-tags.outputs.build-date }}'
+
+          echo "image=$image" | tee -a "$GITHUB_OUTPUT"
+          echo "artifact-name=$artifact_name" | tee -a $GITHUB_OUTPUT
+          echo "tags=$tags" | tee -a $GITHUB_OUTPUT
+
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*
+          pattern: digests-${{ steps.metadata.outputs.artifact-name }}-*
           merge-multiple: true
 
       - name: Login to GitHub Container Registry
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -334,18 +381,19 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ needs.build-dockerfile.outputs.image }}
-          tags: ${{ needs.build-dockerfile.outputs.tag }}
+          flavor: latest=true
+          images: ${{ steps.metadata.outputs.image }}
+          tags: ${{ steps.metadata.outputs.tags }}
 
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
           # https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ needs.build-dockerfile.outputs.image }}@sha256:%s ' *)
+            $(printf ' ${{ steps.metadata.outputs.image }}@sha256:%s ' *)
 
       - name: Inspect image
-        run: docker buildx imagetools inspect ${{ needs.build-dockerfile.outputs.image }}:${{ steps.meta.outputs.version }}
+        run: docker buildx imagetools inspect ${{ steps.metadata.outputs.image }}:${{ steps.meta.outputs.version }}
 
 
   build-cxx-ubuntu-images-status-check:
