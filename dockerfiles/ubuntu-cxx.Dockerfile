@@ -23,7 +23,9 @@ fi
 RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list
 
 RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
 &&  chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
@@ -65,14 +67,15 @@ RUN apt-get update -q || true                      \
                           "${PYTHON}-venv"         \
                           xz-utils                 \
                           zstd                     \
-&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy-19 "g++-${COMPILER_VERSION}" lld-19; fi \
+&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy-20 "g++-${COMPILER_VERSION}" lld-20; fi \
 &&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
 &&  if [ $COMPILER = clang-14 ] || \
        [ $COMPILER = clang-15 ] || \
        [ $COMPILER = clang-16 ] || \
        [ $COMPILER = clang-17 ] || \
        [ $COMPILER = clang-18 ] || \
-       [ $COMPILER = clang-19 ] ; then \
+       [ $COMPILER = clang-19 ] || \
+       [ $COMPILER = clang-20 ] ; then \
     apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; \
 fi \
 &&  rm -rf /var/lib/apt/lists/*
@@ -116,7 +119,7 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-19                 100; \
+&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-20                 100; \
 fi
 
 
@@ -161,15 +164,15 @@ RUN apt-get update -q || true \
     cmake \
     curl \
     elfutils \
-    clang-19 \
-    clang++-19 \
+    clang-20 \
+    clang++-20 \
     xz-utils
 
 RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=clang-19 \
-          -DCMAKE_CXX_COMPILER=clang++-19 \
+          -DCMAKE_C_COMPILER=clang-20 \
+          -DCMAKE_CXX_COMPILER=clang++-20 \
           -DENABLE_TESTING=ON \
           -DREDIS_STORAGE_BACKEND=OFF \
           -DDEPS=DOWNLOAD \
