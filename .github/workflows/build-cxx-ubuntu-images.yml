@@ -163,18 +163,24 @@ jobs:
               {
                   "compiler-name": "clang",
                   "compiler-version": 19,
+                  "os-version": "24.04",
+                  "python-version": "3.12",
+              },
+              {
+                  "compiler-name": "clang",
+                  "compiler-version": 20,
                   "os-version": "20.04",
                   "python-version": "3.9",
               },
               {
                   "compiler-name": "clang",
-                  "compiler-version": 19,
+                  "compiler-version": 20,
                   "os-version": "22.04",
                   "python-version": "3.11",
               },
               {
                   "compiler-name": "clang",
-                  "compiler-version": 19,
+                  "compiler-version": 20,
                   "os-version": "24.04",
                   "python-version": "3.12",
               },
