@@ -48,8 +48,8 @@ jobs:
 
 
           os_name = "ubuntu"
-          cmake_version = "3.31.*"
-          conan_version = "2.13.*"
+          cmake_version = "4.0.*"
+          conan_version = "2.14.*"
 
           templates = (
               {
