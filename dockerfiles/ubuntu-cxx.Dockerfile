@@ -9,8 +9,13 @@ FROM $BASE_OS AS update-apt-src
 ARG BASE_OS
 
 RUN apt-get update -q \
-&&  apt-get install -y curl gnupg lsb-release
+&&  apt-get install -y ca-certificates curl gnupg lsb-release
 
+RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
+&&  curl -L 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+&&  chmod 644 /usr/share/keyrings/*.gpg
+
+# Configure https://apt.llvm.org/
 RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ; then \
     echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list  \
@@ -27,9 +32,10 @@ RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list
 
-RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
-&&  chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
+# Configure https://cli.github.com/
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" >> /etc/apt/sources.list
 
+RUN apt-get update -q
 
 FROM $BASE_OS AS base
 
@@ -39,7 +45,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
-COPY --from=update-apt-src /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
+COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
 
 ARG COMPILER_NAME
 ARG COMPILER_VERSION
@@ -155,7 +161,7 @@ FROM $BASE_OS AS ccache-builder
 ARG CCACHE_VER=4.10.2
 
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
-COPY --from=update-apt-src /usr/share/keyrings/apt.llvm.org.gpg /usr/share/keyrings/apt.llvm.org.gpg
+COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
 
 RUN apt-get update -q || true \
 &&  apt-get install -y ca-certificates \
