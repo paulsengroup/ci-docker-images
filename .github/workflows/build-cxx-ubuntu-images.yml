@@ -95,6 +95,12 @@ jobs:
                   "python-version": "3.12",
               },
               {
+                  "compiler-name": "gcc",
+                  "compiler-version": 15,
+                  "os-version": "25.04",
+                  "python-version": "3.13",
+              },
+              {
                   "compiler-name": "clang",
                   "compiler-version": 8,
                   "os-version": "20.04",
