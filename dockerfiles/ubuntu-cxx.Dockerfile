@@ -73,8 +73,22 @@ RUN apt-get update -q || true                      \
                           "${PYTHON}-venv"         \
                           xz-utils                 \
                           zstd                     \
-&&  if [ $COMPILER_NAME = gcc ] ; then apt-get install -q -y clang-tidy-20 "g++-${COMPILER_VERSION}" lld-20; fi \
-&&  if [ $COMPILER_NAME = clang ] ; then apt-get install -q -y "clang-tidy-${COMPILER_VERSION}" "lld-${COMPILER_VERSION}" "llvm-${COMPILER_VERSION}"; fi \
+&&  if [ $COMPILER_NAME = gcc ] ; then \
+    apt-get install -q -y \
+      clang-tidy-20 \
+      "g++-${COMPILER_VERSION}" \
+      libc++abi-20-dev \
+      libc++-20-dev \
+      lld-20; \
+    fi \
+&&  if [ $COMPILER_NAME = clang ] ; then \
+    apt-get install -q -y \
+    "clang-tidy-${COMPILER_VERSION}" \
+    "libc++abi-${COMPILER_VERSION}-dev" \
+    "libc++-${COMPILER_VERSION}-dev" \
+    "lld-${COMPILER_VERSION}" \
+    "llvm-${COMPILER_VERSION}"; \
+    fi \
 &&  if [ $COMPILER = clang-14 ] || \
        [ $COMPILER = clang-15 ] || \
        [ $COMPILER = clang-16 ] || \
@@ -83,7 +97,7 @@ RUN apt-get update -q || true                      \
        [ $COMPILER = clang-19 ] || \
        [ $COMPILER = clang-20 ] ; then \
     apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; \
-fi \
+    fi \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
@@ -115,6 +129,8 @@ RUN mkdir "$HOME/.conan2/" \
 && conan --help
 
 COPY assets/settings.yml /root/.conan2/settings.yml
+
+RUN ln -s "$HOME/.conan2/" /opt/conan
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
     CC=gcc-$COMPILER_VERSION  \
