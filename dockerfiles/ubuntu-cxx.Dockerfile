@@ -158,7 +158,7 @@ ARG BASE_OS
 
 FROM $BASE_OS AS ccache-builder
 
-ARG CCACHE_VER=4.10.2
+ARG CCACHE_VER=4.11.3
 
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
 COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
