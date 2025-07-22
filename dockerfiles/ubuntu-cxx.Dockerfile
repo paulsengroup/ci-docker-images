@@ -47,54 +47,29 @@ ENV TZ=Etc/UTC
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
 COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
 
-ARG COMPILER_NAME
-ARG COMPILER_VERSION
-ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
-
-ARG PYTHON_VERSION
-
-RUN if [ -z $COMPILER_NAME ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
-RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition" && exit 1; fi
-RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
-
-ARG PYTHON="python${PYTHON_VERSION}"
-
 RUN apt-get update -q || true                      \
 &&  apt-get install -y ca-certificates             \
 &&  apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
-                          "$COMPILER"              \
                           cppcheck                 \
                           git                      \
                           make                     \
                           ninja-build              \
                           patch                    \
-                          "${PYTHON}"              \
-                          "${PYTHON}-venv"         \
                           xz-utils                 \
                           zstd                     \
-&&  if [ $COMPILER_NAME = gcc ] ; then \
-    apt-get install -q -y \
-      clang-tidy-20 \
-      "g++-${COMPILER_VERSION}" \
-      libc++abi-20-dev \
-      libc++-20-dev \
-      lld-20; \
-    fi \
-&&  if [ $COMPILER_NAME = clang ] ; then \
-    apt-get install -q -y \
-    "clang-tidy-${COMPILER_VERSION}" \
-    "libc++abi-${COMPILER_VERSION}-dev" \
-    "libc++-${COMPILER_VERSION}-dev" \
-    "lld-${COMPILER_VERSION}" \
-    "llvm-${COMPILER_VERSION}"; \
-    fi \
-&&  if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|20)$'; then \
-      apt-get install -q -y "libunwind-${COMPILER_VERSION}-dev"; \
-    fi \
-&&  if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|20)$'; then \
-      apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; \
-    fi \
+&&  rm -rf /var/lib/apt/lists/*
+
+ARG PYTHON_VERSION
+
+RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
+
+ARG PYTHON="python${PYTHON_VERSION}"
+
+RUN apt-get update -q                              \
+&&  apt-get install -q -y --no-install-recommends  \
+                          "${PYTHON}"              \
+                          "${PYTHON}-venv"         \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
@@ -114,12 +89,51 @@ RUN python3 -m venv /opt/venv --upgrade    \
                  "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}"
 
+ARG COMPILER_NAME
+ARG COMPILER_VERSION
+ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
+
+RUN if [ -z $COMPILER_NAME ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
+RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition" && exit 1; fi
+
+RUN if [ $COMPILER_NAME = gcc ] ; then \
+      apt-get update -q && apt-get install -q -y \
+        clang-tidy-20 \
+        "g++-${COMPILER_VERSION}" \
+        libc++abi-20-dev \
+        libc++-20-dev \
+        libunwind-20-dev \
+        lld-20 \
+    && rm -rf /var/lib/apt/lists/*; \
+fi
+
+RUN if [ $COMPILER_NAME = clang ] ; then \
+    apt-get update -q && apt-get install -q -y \
+      "clang-tidy-${COMPILER_VERSION}" \
+      "libc++abi-${COMPILER_VERSION}-dev" \
+      "libc++-${COMPILER_VERSION}-dev" \
+      "lld-${COMPILER_VERSION}" \
+      "llvm-${COMPILER_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*; \
+fi
+
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|20)$'; then \
+    apt-get update -q && apt-get install -q -y \
+      "libunwind-${COMPILER_VERSION}-dev" \
+    && rm -rf /var/lib/apt/lists/*; \
+fi
+
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|20)$'; then \
+    apt-get update -q && apt-get install -q -y \
+      "libclang-rt-${COMPILER_VERSION}-dev" \
+    && rm -rf /var/lib/apt/lists/*; \
+fi
+
 ENV CC=/usr/bin/cc
 ENV CXX=/usr/bin/c++
 ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
-
 
 # Populate Conan data
 RUN mkdir "$HOME/.conan2/" \
@@ -141,7 +155,6 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-20                 100; \
 fi
 
-
 RUN if [ $COMPILER_NAME = clang ] ; then \
     CC=clang-$COMPILER_VERSION    \
     CXX=clang++-$COMPILER_VERSION \
@@ -153,8 +166,6 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100  \
 &&  update-alternatives --install /usr/bin/ld  ld  /usr/bin/lld-$COMPILER_VERSION     100; \
 fi
-
-RUN ln -s "$HOME/.conan2/" /opt/conan
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
 &&  echo 'compiler.libcxx=libstdc++11' >> "$CONAN_DEFAULT_PROFILE_PATH" \
