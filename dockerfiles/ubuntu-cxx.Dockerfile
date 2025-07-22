@@ -89,14 +89,11 @@ RUN apt-get update -q || true                      \
     "lld-${COMPILER_VERSION}" \
     "llvm-${COMPILER_VERSION}"; \
     fi \
-&&  if [ $COMPILER = clang-14 ] || \
-       [ $COMPILER = clang-15 ] || \
-       [ $COMPILER = clang-16 ] || \
-       [ $COMPILER = clang-17 ] || \
-       [ $COMPILER = clang-18 ] || \
-       [ $COMPILER = clang-19 ] || \
-       [ $COMPILER = clang-20 ] ; then \
-    apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; \
+&&  if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|20)$'; then \
+      apt-get install -q -y "libunwind-${COMPILER_VERSION}-dev"; \
+    fi \
+&&  if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|20)$'; then \
+      apt-get install -q -y "libclang-rt-${COMPILER_VERSION}-dev"; \
     fi \
 &&  rm -rf /var/lib/apt/lists/*
 
