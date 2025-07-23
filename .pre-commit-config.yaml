@@ -29,6 +29,7 @@ repos:
     rev: v2.4.1
     hooks:
       - id: codespell
+        exclude: ^assets/
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.18.1
     hooks:
