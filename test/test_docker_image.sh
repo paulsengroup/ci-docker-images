@@ -26,8 +26,8 @@ set -eu
 cat /etc/*-release
 
 # print compiler information
-cc --version
-c++ --version
+"$CC" --version
+"$CXX" --version
 
 # print CMake information
 which cmake

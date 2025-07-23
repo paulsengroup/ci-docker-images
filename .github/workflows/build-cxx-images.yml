@@ -1,20 +1,24 @@
 # Copyright (C) 2022 Roberto Rossini (roberros@uio.no)
 # SPDX-License-Identifier: MIT
 
-name: "Build Ubuntu Docker images for CXX development/testing"
+name: "Build Docker images for CXX development/testing"
 on:
   push:
     branches: [ main, devel, ci-devel ]
     paths:
-      - ".github/workflows/build-cxx-ubuntu-images.yml"
+      - ".github/workflows/build-cxx-images.yml"
       - "assets/settings.yml"
+      - "dockerfiles/alpine-cxx.Dockerfile"
       - "dockerfiles/ubuntu-cxx.Dockerfile"
+      - "scripts/generate_job_matrix.py"
   pull_request:
     branches: [ main, devel, ci-devel ]
     paths:
-      - ".github/workflows/build-cxx-ubuntu-images.yml"
+      - ".github/workflows/build-cxx-images.yml"
       - "assets/settings.yml"
+      - "dockerfiles/alpine-cxx.Dockerfile"
       - "dockerfiles/ubuntu-cxx.Dockerfile"
+      - "scripts/generate_job_matrix.py"
   workflow_dispatch:
 
   schedule:
@@ -29,6 +33,11 @@ permissions:
   contents: read
   packages: write
 
+# https://stackoverflow.com/a/72408109
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   matrix-factory:
     name: Generate job matrix
@@ -38,188 +47,15 @@ jobs:
       matrix-amd64: ${{ steps.generate-matrix.outputs.matrix-amd64 }}
       matrix-arm64: ${{ steps.generate-matrix.outputs.matrix-arm64 }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Generate matrix
         id: generate-matrix
-        shell: python
         run: |
-          import json
-          import os
-          import sys
-
-
-          os_name = "ubuntu"
-          cmake_version = "4.0.*"
-          conan_version = "2.18.*"
-
-          templates = (
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 8,
-                  "os-version": "20.04",
-                  "python-version": "3.9",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 9,
-                  "os-version": "22.04",
-                  "python-version": "3.11",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 10,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 11,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 12,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 13,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 14,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "gcc",
-                  "compiler-version": 15,
-                  "os-version": "25.04",
-                  "python-version": "3.13",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 8,
-                  "os-version": "20.04",
-                  "python-version": "3.9",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 9,
-                  "os-version": "20.04",
-                  "python-version": "3.9",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 10,
-                  "os-version": "20.04",
-                  "python-version": "3.9",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 11,
-                  "os-version": "22.04",
-                  "python-version": "3.11",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 12,
-                  "os-version": "22.04",
-                  "python-version": "3.11",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 13,
-                  "os-version": "22.04",
-                  "python-version": "3.11",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 14,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 15,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 16,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 17,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 18,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 19,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 20,
-                  "os-version": "20.04",
-                  "python-version": "3.9",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 20,
-                  "os-version": "22.04",
-                  "python-version": "3.11",
-              },
-              {
-                  "compiler-name": "clang",
-                  "compiler-version": 20,
-                  "os-version": "24.04",
-                  "python-version": "3.12",
-              },
-          )
-
-          includes_amd64 = []
-          includes_arm64 = []
-
-          for t in templates:
-              t |= {"os-name": os_name, "cmake-version": cmake_version, "conan-version": conan_version}
-              includes_amd64.append(t | {"runner": "ubuntu-24.04",     "platform": "linux/amd64"})
-              includes_arm64.append(t | {"runner": "ubuntu-24.04-arm", "platform": "linux/arm64"})
-
-          includes = includes_amd64 + includes_arm64
-
-          json.dump(
-              {"include": includes},
-              fp=sys.stdout,
-              indent=2,
-              sort_keys=True,
-          )
-
-          def write_output(key, data, f):
-              data = json.dumps(
-                  {"include": data},
-                  sort_keys=True,
-              )
-              print(f"{key}={data}", file=f)
-
-          with open(os.environ.get("GITHUB_OUTPUT"), "a") as f:
-              write_output("matrix-amd64", includes_amd64, f)
-              write_output("matrix-arm64", includes_arm64, f)
-              write_output("matrix", includes, f)
+          scripts/generate_job_matrix.py \
+            --include-alpine \
+            --include-ubuntu
 
   generate-tags:
     name: Generate Image tags
@@ -260,7 +96,10 @@ jobs:
       - name: Extract metadata
         id: metadata
         run: |
-          image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}'
+          image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx'
+          if [ '${{ matrix.compiler-name }}' != 'null' ]; then
+            image+="$image-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+          fi
 
           echo "commit-date=${{ needs.generate-tags.outputs.commit-date }}" | tee -a "$GITHUB_OUTPUT"
           echo "build-date=${{ needs.generate-tags.outputs.build-date }}" | tee -a "$GITHUB_OUTPUT"
@@ -291,7 +130,7 @@ jobs:
         with:
           load: true
           push: false
-          file: dockerfiles/ubuntu-cxx.Dockerfile
+          file: dockerfiles/${{ matrix.os-name }}-cxx.Dockerfile
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
           tags: tmp:latest
@@ -313,7 +152,7 @@ jobs:
         with:
           context: ${{ github.workspace }}
           push: true
-          file: dockerfiles/ubuntu-cxx.Dockerfile
+          file: dockerfiles/${{ matrix.os-name }}-cxx.Dockerfile
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
           outputs: type=image,"name=${{ steps.metadata.outputs.image }}",push-by-digest=true,name-canonical=true,push=true
@@ -364,7 +203,11 @@ jobs:
       - name: Collect metadata
         id: metadata
         run: |
-          image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}'
+          image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx'
+          if [ '${{ matrix.compiler-name }}' != 'null' ]; then
+            image+="$image-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+          fi
+
           artifact_name="$(echo "$image" | sed 's|[^[:alnum:]=-]\+|-|g')"
           tags='${{ needs.generate-tags.outputs.build-date }}'
 
@@ -409,7 +252,7 @@ jobs:
 
 
   build-cxx-ubuntu-images-status-check:
-    name: Status Check (Build Ubuntu Docker images for CXX development/testing)
+    name: Status Check (Build Docker images for CXX development/testing)
     if: ${{ always() }}
     runs-on: ubuntu-latest
     needs:
