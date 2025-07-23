@@ -97,7 +97,7 @@ jobs:
         id: metadata
         run: |
           image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx'
-          if [ '${{ matrix.compiler-name }}' != 'null' ]; then
+          if [ -n '${{ matrix.compiler-name }}' ]; then
             image+="$image-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
           fi
 
@@ -204,7 +204,7 @@ jobs:
         id: metadata
         run: |
           image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx'
-          if [ '${{ matrix.compiler-name }}' != 'null' ]; then
+          if [ -n '${{ matrix.compiler-name }}' ]; then
             image+="$image-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
           fi
 
