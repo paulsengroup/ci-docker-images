@@ -98,7 +98,7 @@ jobs:
         run: |
           image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx'
           if [ -n '${{ matrix.compiler-name }}' ]; then
-            image+="$image-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+            image+="-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
           fi
 
           echo "commit-date=${{ needs.generate-tags.outputs.commit-date }}" | tee -a "$GITHUB_OUTPUT"
@@ -205,7 +205,7 @@ jobs:
         run: |
           image='ghcr.io/${{ github.repository }}/${{ matrix.os-name }}-${{ matrix.os-version }}-cxx'
           if [ -n '${{ matrix.compiler-name }}' ]; then
-            image+="$image-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
+            image+="-${{ matrix.compiler-name }}-${{ matrix.compiler-version }}"
           fi
 
           artifact_name="$(echo "$image" | sed 's|[^[:alnum:]=-]\+|-|g')"
