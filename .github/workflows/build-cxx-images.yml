@@ -216,7 +216,7 @@ jobs:
           echo "tags=$tags" | tee -a $GITHUB_OUTPUT
 
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-${{ steps.metadata.outputs.artifact-name }}-*
