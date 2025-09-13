@@ -30,7 +30,9 @@ RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" >> /etc/apt/sources.list
 
 # Configure https://cli.github.com/
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" >> /etc/apt/sources.list
@@ -98,12 +100,12 @@ RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition"
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
       apt-get update -q && apt-get install -q -y \
-        clang-tidy-20 \
+        clang-tidy-21 \
         "g++-${COMPILER_VERSION}" \
-        libc++abi-20-dev \
-        libc++-20-dev \
-        libunwind-20-dev \
-        lld-20 \
+        libc++abi-21-dev \
+        libc++-21-dev \
+        libunwind-21-dev \
+        lld-21 \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
@@ -117,13 +119,13 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|20)$'; then \
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|2[0-1])$'; then \
     apt-get update -q && apt-get install -q -y \
       "libunwind-${COMPILER_VERSION}-dev" \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|20)$'; then \
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|2[0-1])$'; then \
     apt-get update -q && apt-get install -q -y \
       "libclang-rt-${COMPILER_VERSION}-dev" \
     && rm -rf /var/lib/apt/lists/*; \
@@ -152,7 +154,7 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-20                 100; \
+&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-21                 100; \
 fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
@@ -193,16 +195,16 @@ RUN apt-get update -q || true \
 &&  apt-get install -y \
     cmake \
     curl \
+    clang-21 \
+    clang++-21 \
     elfutils \
-    clang-20 \
-    clang++-20 \
     xz-utils
 
 RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=clang-20 \
-          -DCMAKE_CXX_COMPILER=clang++-20 \
+          -DCMAKE_C_COMPILER=clang-21 \
+          -DCMAKE_CXX_COMPILER=clang++-21 \
           -DENABLE_TESTING=ON \
           -DREDIS_STORAGE_BACKEND=OFF \
           -DDEPS=DOWNLOAD \
