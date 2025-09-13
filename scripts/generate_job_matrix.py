@@ -19,12 +19,12 @@ def make_cli() -> argparse.ArgumentParser:
     cli.add_argument(
         "--conan-version",
         type=str,
-        default="2.18.*",
+        default="2.20.*",
     )
     cli.add_argument(
         "--cmake-version",
         type=str,
-        default="4.0.*",
+        default="4.1.*",
     )
     cli.add_argument(
         "--include-alpine",
@@ -225,18 +225,24 @@ def generate_ubuntu(
         {
             "compiler-name": "clang",
             "compiler-version": 20,
+            "os-version": "24.04",
+            "python-version": "3.12",
+        },
+        {
+            "compiler-name": "clang",
+            "compiler-version": 21,
             "os-version": "20.04",
             "python-version": "3.9",
         },
         {
             "compiler-name": "clang",
-            "compiler-version": 20,
+            "compiler-version": 21,
             "os-version": "22.04",
             "python-version": "3.11",
         },
         {
             "compiler-name": "clang",
-            "compiler-version": 20,
+            "compiler-version": 21,
             "os-version": "24.04",
             "python-version": "3.12",
         },
