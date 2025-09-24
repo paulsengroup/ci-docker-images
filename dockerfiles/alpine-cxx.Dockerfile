@@ -35,8 +35,8 @@ RUN apk add --no-cache \
     xz \
     zstd
 
-ARG CMAKE_VERSION='2.18.*'
-ARG CONAN_VERSION='4.0.*'
+ARG CMAKE_VERSION='4.1.*'
+ARG CONAN_VERSION='2.19.*'
 
 RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
 RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
