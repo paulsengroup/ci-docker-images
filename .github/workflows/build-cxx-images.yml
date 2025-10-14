@@ -155,7 +155,7 @@ jobs:
           file: dockerfiles/${{ matrix.os-name }}-cxx.Dockerfile
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platform }}
-          outputs: type=image,"name=${{ steps.metadata.outputs.image }}",push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,"name=${{ steps.metadata.outputs.image }}",push-by-digest=true,name-canonical=true,push=true,compression=zstd,compression-level=19,force-compression=true
           build-args: |
             BASE_OS=${{ matrix.os-name }}:${{ matrix.os-version }}
             COMPILER_NAME=${{ matrix.compiler-name }}
