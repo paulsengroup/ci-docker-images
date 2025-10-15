@@ -48,7 +48,7 @@ jobs:
       matrix-arm64: ${{ steps.generate-matrix.outputs.matrix-arm64 }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Generate matrix
         id: generate-matrix
@@ -65,7 +65,7 @@ jobs:
       build-date: ${{ steps.metadata.outputs.build-date }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract metadata
         id: metadata
@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract metadata
         id: metadata
