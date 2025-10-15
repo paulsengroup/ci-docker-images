@@ -154,7 +154,8 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/lld-21                 100; \
+&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/ld.lld-21              100  \
+&&  update-alternatives --install /usr/bin/lld  lld  /usr/bin/lld-21                 100; \
 fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
@@ -166,7 +167,8 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
     done; \
     update-alternatives --install /usr/bin/cc  cc  /usr/bin/clang-$COMPILER_VERSION   100  \
 &&  update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld  ld  /usr/bin/lld-$COMPILER_VERSION     100; \
+&&  update-alternatives --install /usr/bin/ld  ld  /usr/bin/ld.lld-$COMPILER_VERSION  100  \
+&&  update-alternatives --install /usr/bin/lld lld /usr/bin/lld-$COMPILER_VERSION     100; \
 fi
 
 RUN sed -i '/^compiler\.libcxx.*$/d' "$CONAN_DEFAULT_PROFILE_PATH"      \
