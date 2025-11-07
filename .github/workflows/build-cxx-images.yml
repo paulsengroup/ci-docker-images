@@ -55,7 +55,10 @@ jobs:
         run: |
           scripts/generate_job_matrix.py \
             --include-alpine \
-            --include-ubuntu
+            --include-ubuntu \
+            --cmake-version='4.1.*' \
+            --conan-version='2.22.*'
+
 
   generate-tags:
     name: Generate Image tags
