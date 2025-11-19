@@ -149,6 +149,11 @@ ARG FINAL_OS
 
 FROM ${FINAL_OS} AS final
 
+
+RUN apt-get update \
+&&  apt-get install -q -y ca-certificates \
+&&  rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder-dbg /opt/python /opt/python
 COPY --from=builder-rel /opt/python /opt/python
 COPY --from=builder-dbg-tsan /opt/python /opt/python
