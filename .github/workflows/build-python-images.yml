@@ -37,7 +37,7 @@ jobs:
       build-date: ${{ steps.metadata.outputs.build-date }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Extract metadata
         id: metadata
@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Extract metadata
         id: metadata
@@ -142,7 +142,7 @@ jobs:
 
       - name: Upload digest
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: digests-${{ steps.generate-artifact-name.outputs.name }}
           path: ${{ runner.temp }}/digests/*
@@ -186,7 +186,7 @@ jobs:
           echo "tags=$tags" | tee -a $GITHUB_OUTPUT
 
       - name: Download digests
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-${{ steps.metadata.outputs.artifact-name }}-*
