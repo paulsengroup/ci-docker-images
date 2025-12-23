@@ -56,8 +56,8 @@ jobs:
           scripts/generate_job_matrix.py \
             --include-alpine \
             --include-ubuntu \
-            --cmake-version='4.1.*' \
-            --conan-version='2.22.*'
+            --cmake-version='4.2.*' \
+            --conan-version='2.24.*'
 
 
   generate-tags:
