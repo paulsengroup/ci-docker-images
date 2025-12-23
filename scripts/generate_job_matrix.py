@@ -222,12 +222,12 @@ def generate_ubuntu(
             "os-version": "24.04",
             "python-version": "3.12",
         },
-        {
-            "compiler-name": "clang",
-            "compiler-version": 20,
-            "os-version": "24.04",
-            "python-version": "3.12",
-        },
+        # {
+        #    "compiler-name": "clang",
+        #    "compiler-version": 20,
+        #    "os-version": "24.04",
+        #    "python-version": "3.12",
+        # },
         {
             "compiler-name": "clang",
             "compiler-version": 21,
