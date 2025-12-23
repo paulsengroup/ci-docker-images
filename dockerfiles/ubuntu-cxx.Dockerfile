@@ -41,7 +41,6 @@ RUN apt-get update -q
 
 FROM $BASE_OS AS base
 
-ENV CONAN_CMAKE_GENERATOR=Ninja
 ARG PIP_NO_CACHE_DIR=0
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -186,10 +185,21 @@ ARG BASE_OS
 
 FROM $BASE_OS AS ccache-builder
 
-ARG CCACHE_VER=4.11.3
+ARG CCACHE_VER=4.12.2
+ARG DEBIAN_FRONTEND=noninteractive
+ARG PIP_NO_CACHE_DIR=0
+ARG PYTHON_VERSION
+ENV TZ=Etc/UTC
+
+RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
+
+ARG PYTHON="python${PYTHON_VERSION}"
 
 COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
 COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
+
+ARG PYTHON_VENV=/tmp/venv
+ARG PATH="$PYTHON_VENV/bin:$PATH"
 
 RUN apt-get update -q || true \
 &&  apt-get install -y ca-certificates \
@@ -200,7 +210,13 @@ RUN apt-get update -q || true \
     clang-21 \
     clang++-21 \
     elfutils \
-    xz-utils
+    "${PYTHON}" \
+    "${PYTHON}-venv" \
+    xz-utils \
+&& rm -rf /var/lib/apt/lists/*
+
+RUN "/usr/bin/$PYTHON" -m venv "$PYTHON_VENV" --upgrade \
+&&  "$PYTHON_VENV/bin/pip" install 'cmake>=3.18'
 
 RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
 
