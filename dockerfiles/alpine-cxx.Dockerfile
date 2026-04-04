@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 
-ARG BASE_OS=alpine:3.22
+ARG BASE_OS=alpine:3.23
 
 FROM $BASE_OS AS base
 
@@ -13,9 +13,9 @@ ARG PIP_NO_CACHE_DIR=0
 RUN apk add --no-cache \
     bash \
     ccache \
-    clang20-dev \
-    clang20-extra-tools \
-    clang20-static \
+    clang21-dev \
+    clang21-extra-tools \
+    clang21-static \
     compiler-rt \
     cppcheck \
     git \
@@ -50,8 +50,8 @@ RUN python3 -m venv /opt/venv --upgrade    \
                  "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}"
 
-ENV CC=/usr/bin/clang
-ENV CXX=/usr/bin/clang++
+ENV CC=/usr/bin/clang-21
+ENV CXX=/usr/bin/clang++-21
 ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"

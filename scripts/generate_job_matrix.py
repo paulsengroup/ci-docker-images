@@ -19,12 +19,12 @@ def make_cli() -> argparse.ArgumentParser:
     cli.add_argument(
         "--conan-version",
         type=str,
-        default="2.20.*",
+        default="2.27.*",
     )
     cli.add_argument(
         "--cmake-version",
         type=str,
-        default="4.1.*",
+        default="4.3.*",
     )
     cli.add_argument(
         "--include-alpine",
@@ -59,7 +59,7 @@ def generate_alpine(
 ) -> Dict[str, JobDicts]:
     os_name = "alpine"
     if os_version is None:
-        os_version = "3.22"
+        os_version = "3.23"
 
     includes_amd64 = [
         {
