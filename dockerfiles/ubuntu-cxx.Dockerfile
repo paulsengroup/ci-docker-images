@@ -32,7 +32,9 @@ RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" >> /etc/apt/sources.list
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main" >> /etc/apt/sources.list
 
 # Configure https://cli.github.com/
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" >> /etc/apt/sources.list
@@ -118,13 +120,13 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|2[0-1])$'; then \
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|2[0-2])$'; then \
     apt-get update -q && apt-get install -q -y \
       "libunwind-${COMPILER_VERSION}-dev" \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|2[0-1])$'; then \
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|2[0-2])$'; then \
     apt-get update -q && apt-get install -q -y \
       "libclang-rt-${COMPILER_VERSION}-dev" \
     && rm -rf /var/lib/apt/lists/*; \
