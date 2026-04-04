@@ -61,14 +61,14 @@ jobs:
           - { runner: ubuntu-24.04,
               platform: "linux/amd64",
               python-version: "3.14",
-              url: "https://www.python.org/ftp/python/3.14.2/Python-3.14.2.tar.xz",
-              sha256: "ce543ab854bc256b61b71e9b27f831ffd1bfd60a479d639f8be7f9757cf573e9"
+              url: "https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tar.xz",
+              sha256: "a97d5549e9ad81fe17159ed02c68774ad5d266c72f8d9a0b5a9c371fe85d902b"
           }
           - { runner: ubuntu-24.04-arm,
               platform: "linux/arm64",
               python-version: "3.14",
-              url: "https://www.python.org/ftp/python/3.14.2/Python-3.14.2.tar.xz",
-              sha256: "ce543ab854bc256b61b71e9b27f831ffd1bfd60a479d639f8be7f9757cf573e9"
+              url: "https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tar.xz",
+              sha256: "a97d5549e9ad81fe17159ed02c68774ad5d266c72f8d9a0b5a9c371fe85d902b"
           }
     runs-on: ${{ matrix.runner }}
 
