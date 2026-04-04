@@ -187,7 +187,7 @@ ARG BASE_OS
 
 FROM $BASE_OS AS ccache-builder
 
-ARG CCACHE_VER=4.12.2
+ARG CCACHE_VER=4.13.2
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PIP_NO_CACHE_DIR=0
 ARG PYTHON_VERSION
@@ -209,8 +209,8 @@ RUN apt-get update -q || true \
 &&  apt-get install -y \
     cmake \
     curl \
-    clang-21 \
-    clang++-21 \
+    clang-22 \
+    clang++-22 \
     elfutils \
     "${PYTHON}" \
     "${PYTHON}-venv" \
@@ -223,8 +223,8 @@ RUN "/usr/bin/$PYTHON" -m venv "$PYTHON_VENV" --upgrade \
 RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=clang-21 \
-          -DCMAKE_CXX_COMPILER=clang++-21 \
+          -DCMAKE_C_COMPILER=clang-22 \
+          -DCMAKE_CXX_COMPILER=clang++-22 \
           -DENABLE_TESTING=ON \
           -DREDIS_STORAGE_BACKEND=OFF \
           -DDEPS=DOWNLOAD \
