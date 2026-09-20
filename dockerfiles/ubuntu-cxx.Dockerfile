@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_OS
+ARG BASE_OS=ubuntu:26.04
 
 FROM $BASE_OS AS update-apt-src
 
@@ -11,8 +11,8 @@ ARG BASE_OS
 RUN apt-get update -q \
 &&  apt-get install -y ca-certificates curl gnupg lsb-release
 
-RUN curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
-&&  curl -L 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+RUN curl --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
+&&  curl --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
 &&  chmod 644 /usr/share/keyrings/*.gpg
 
 # Configure https://apt.llvm.org/
@@ -25,16 +25,23 @@ RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ; then \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" >> /etc/apt/sources.list; \
 fi
 
-RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
+RUN if [ "$BASE_OS" = 'ubuntu:24.04' ] ; then \
+    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list  \
-&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list; \
+fi
+
+RUN if [ "$BASE_OS" = 'ubuntu:26.04' ] ; then \
+    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main" >> /etc/apt/sources.list
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-23 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-23 main" >> /etc/apt/sources.list; \
+fi
 
 # Configure https://cli.github.com/
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" >> /etc/apt/sources.list
@@ -63,25 +70,21 @@ RUN apt-get update -q || true                      \
                           zstd                     \
 &&  rm -rf /var/lib/apt/lists/*
 
-ARG PYTHON_VERSION
-
-RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
+ARG PYTHON_VERSION=3.14
 
 ARG PYTHON="python${PYTHON_VERSION}"
 
 RUN apt-get update -q                              \
 &&  apt-get install -q -y --no-install-recommends  \
+                          python-is-python3        \
                           "${PYTHON}"              \
                           "${PYTHON}-venv"         \
 &&  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/$PYTHON 100
 
-ARG CMAKE_VERSION
-ARG CONAN_VERSION
-
-RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
-RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
+ARG CMAKE_VERSION="4.4.*"
+ARG CONAN_VERSION="2.32.*"
 
 RUN python3 -m venv /opt/venv --upgrade    \
 &&  /opt/venv/bin/pip install --upgrade    \
@@ -92,21 +95,18 @@ RUN python3 -m venv /opt/venv --upgrade    \
                  "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}"
 
-ARG COMPILER_NAME
-ARG COMPILER_VERSION
+ARG COMPILER_NAME=clang
+ARG COMPILER_VERSION=23
 ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
-
-RUN if [ -z $COMPILER_NAME ]; then echo "Missing COMPILER_NAME definition" && exit 1; fi
-RUN if [ -z $COMPILER_VERSION ]; then echo "Missing COMPILER_VERSION definition" && exit 1; fi
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
       apt-get update -q && apt-get install -q -y \
-        clang-tidy-21 \
+        clang-tidy-23 \
         "g++-${COMPILER_VERSION}" \
-        libc++abi-21-dev \
-        libc++-21-dev \
-        libunwind-21-dev \
-        lld-21 \
+        libc++abi-23-dev \
+        libc++-23-dev \
+        libunwind-23-dev \
+        lld-23 \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
@@ -155,8 +155,8 @@ RUN if [ $COMPILER_NAME = gcc ] ; then \
 &&  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-$COMPILER_VERSION  100  \
 &&  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-$COMPILER_VERSION 100  \
-&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/ld.lld-21              100  \
-&&  update-alternatives --install /usr/bin/lld  lld  /usr/bin/lld-21                 100; \
+&&  update-alternatives --install /usr/bin/ld   ld   /usr/bin/ld.lld-23              100  \
+&&  update-alternatives --install /usr/bin/lld  lld  /usr/bin/lld-23                 100; \
 fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
@@ -183,25 +183,31 @@ RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/t
     fi \
 &&  rm /tmp/test*
 
-ARG BASE_OS
 
-FROM $BASE_OS AS ccache-builder
+FROM ubuntu:22.04 AS ccache-builder
 
-ARG CCACHE_VER=4.13.2
+ARG CCACHE_VER=4.14
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PIP_NO_CACHE_DIR=0
-ARG PYTHON_VERSION
+ARG PYTHON_VERSION=3.10
+ARG CLANG_VERSION=23
 ENV TZ=Etc/UTC
-
-RUN if [ -z $PYTHON_VERSION ]; then echo "Missing PYTHON_VERSION definition" && exit 1; fi
-
 ARG PYTHON="python${PYTHON_VERSION}"
-
-COPY --from=update-apt-src /etc/apt/sources.list /etc/apt/sources.list
-COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
 
 ARG PYTHON_VENV=/tmp/venv
 ARG PATH="$PYTHON_VENV/bin:$PATH"
+
+RUN apt-get update -q || true \
+&&  apt-get install -y ca-certificates \
+&&  apt-get install -y ca-certificates curl gnupg lsb-release \
+&& rm -rf /var/lib/apt/lists/*
+
+RUN curl --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
+&&  chmod 644 /usr/share/keyrings/*.gpg
+
+# Configure https://apt.llvm.org/
+RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-${CLANG_VERSION} main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-${CLANG_VERSION} main" >> /etc/apt/sources.list
 
 RUN apt-get update -q || true \
 &&  apt-get install -y ca-certificates \
@@ -209,22 +215,23 @@ RUN apt-get update -q || true \
 &&  apt-get install -y \
     cmake \
     curl \
-    clang-22 \
-    clang++-22 \
+    "clang-${CLANG_VERSION}" \
+    "clang++-${CLANG_VERSION}" \
     elfutils \
+    python-is-python3 \
     "${PYTHON}" \
     "${PYTHON}-venv" \
     xz-utils \
 && rm -rf /var/lib/apt/lists/*
 
-RUN "/usr/bin/$PYTHON" -m venv "$PYTHON_VENV" --upgrade \
+RUN "/usr/bin/python" -m venv "$PYTHON_VENV" --upgrade \
 &&  "$PYTHON_VENV/bin/pip" install 'cmake>=3.18'
 
 RUN curl -L "https://github.com/ccache/ccache/releases/download/v$CCACHE_VER/ccache-$CCACHE_VER.tar.xz" | tar -xJf -
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=clang-22 \
-          -DCMAKE_CXX_COMPILER=clang++-22 \
+          -DCMAKE_C_COMPILER="clang-${CLANG_VERSION}" \
+          -DCMAKE_CXX_COMPILER="clang++-${CLANG_VERSION}" \
           -DENABLE_TESTING=ON \
           -DREDIS_STORAGE_BACKEND=OFF \
           -DDEPS=DOWNLOAD \
@@ -235,17 +242,22 @@ RUN cmake -DCMAKE_BUILD_TYPE=Release \
 
 RUN cmake --build /tmp/build -j "$(nproc)"
 
+# Some tests require gcc and g++
+RUN apt-get update -q \
+&&  apt-get install -y gcc g++ \
+&& rm -rf /var/lib/apt/lists/*
+
 RUN cd /tmp/build/ \
 &&  ctest --output-on-failure -j "$(nproc)"
 
 RUN cmake --install /tmp/build
 
-FROM base as final
+FROM base AS final
 
 COPY --from=ccache-builder /tmp/ccache/bin/ccache /usr/local/bin/ccache
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
-LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
+LABEL org.opencontainers.image.authors='Roberto Rossini'
 LABEL org.opencontainers.image.url='https://github.com/paulsengroup/ci-docker-images'
 LABEL org.opencontainers.image.documentation='https://github.com/paulsengroup/ci-docker-images'
 LABEL org.opencontainers.image.source='https://github.com/paulsengroup/ci-docker-images'

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 
-ARG BASE_OS=alpine:3.23
+ARG BASE_OS=alpine:3.24
 
 FROM $BASE_OS AS base
 
@@ -12,17 +12,18 @@ ARG PIP_NO_CACHE_DIR=0
 
 RUN apk add --no-cache \
     bash \
+    binutils \
     ccache \
-    clang21-dev \
-    clang21-extra-tools \
-    clang21-static \
+    clang22-dev \
+    clang22-extra-tools \
+    clang22-static \
     compiler-rt \
     cppcheck \
     git \
     libc++-dev \
     libc++-static \
     linux-headers \
-    lld20 \
+    lld22 \
     llvm-libunwind-dev \
     llvm-libunwind-static \
     m4 \
@@ -35,8 +36,8 @@ RUN apk add --no-cache \
     xz \
     zstd
 
-ARG CMAKE_VERSION='4.1.*'
-ARG CONAN_VERSION='2.19.*'
+ARG CMAKE_VERSION='4.4.*'
+ARG CONAN_VERSION='2.32.*'
 
 RUN if [ -z $CMAKE_VERSION ]; then echo "Missing CMAKE_VERSION definition" && exit 1; fi
 RUN if [ -z $CONAN_VERSION ]; then echo "Missing CONAN_VERSION definition" && exit 1; fi
@@ -50,8 +51,8 @@ RUN python3 -m venv /opt/venv --upgrade    \
                  "cmake==${CMAKE_VERSION}" \
                  "conan==${CONAN_VERSION}"
 
-ENV CC=/usr/bin/clang-21
-ENV CXX=/usr/bin/clang++-21
+ENV CC=/usr/bin/clang-22
+ENV CXX=/usr/bin/clang++-22
 ENV CONAN_DEFAULT_PROFILE_PATH=/opt/conan/profiles/default
 ENV PATH="/opt/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/venv/lib:$LD_LIBRARY_PATH"
@@ -68,6 +69,12 @@ RUN conan profile detect --force &> /dev/null
 RUN sed -i 's/^compiler\.libcxx.*$/compiler.libcxx=libc++/' "$CONAN_DEFAULT_PROFILE_PATH" \
 && cat "$CONAN_DEFAULT_PROFILE_PATH"
 
+RUN printf "%s\n" \
+    "-stdlib=libc++" \
+    "-fuse-ld=lld" \
+    "--rtlib=compiler-rt" \
+    >> /etc/clang22/x86_64-alpine-linux-musl.cfg
+
 RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/test.cpp \
 &&  "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \
 &&  if ldd /tmp/test | grep -qF 'not found'; then \
@@ -76,7 +83,7 @@ RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/t
 &&  rm /tmp/test*
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
-LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
+LABEL org.opencontainers.image.authors='Roberto Rossini'
 LABEL org.opencontainers.image.url='https://github.com/paulsengroup/ci-docker-images'
 LABEL org.opencontainers.image.documentation='https://github.com/paulsengroup/ci-docker-images'
 LABEL org.opencontainers.image.source='https://github.com/paulsengroup/ci-docker-images'

@@ -2,13 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_OS='ghcr.io/paulsengroup/ci-docker-images/ubuntu-24.04-cxx-clang-21'
-ARG FINAL_OS='ubuntu:24.04'
+ARG BASE_OS=ubuntu-cxx   #'ghcr.io/paulsengroup/ci-docker-images/ubuntu-26.04-cxx-clang-23'
+ARG FINAL_OS='ubuntu:26.04'
 
 FROM $BASE_OS AS py-src
 
-ARG PYTHON_TAR_URL='https://www.python.org/ftp/python/3.14.0/Python-3.14.0.tar.xz'
-ARG PYTHON_TAR_SHA256='2299dae542d395ce3883aca00d3c910307cd68e0b2f7336098c8e7b7eee9f3e9'
+ARG PYTHON_TAR_URL='https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz'
+ARG PYTHON_TAR_SHA256='3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81'
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=Etc/UTC
@@ -169,7 +169,7 @@ RUN /opt/python/dbg-xsan/bin/python3*d -c 'import sys, lzma; print(sys.version)'
 RUN /opt/python/xsan/bin/python3 -c 'import sys, lzma; print(sys.version)'
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
-LABEL org.opencontainers.image.authors='Roberto Rossini <roberros@uio.no>'
+LABEL org.opencontainers.image.authors='Roberto Rossini'
 LABEL org.opencontainers.image.url='https://github.com/paulsengroup/ci-docker-images'
 LABEL org.opencontainers.image.documentation='https://github.com/paulsengroup/ci-docker-images'
 LABEL org.opencontainers.image.source='https://github.com/paulsengroup/ci-docker-images'
