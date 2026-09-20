@@ -58,13 +58,13 @@ jobs:
       fail-fast: false
       matrix:
         include:  # IMPORTANT: the current setup assumes that all entries refer to the same version of Python
-          - { runner: ubuntu-24.04,
+          - { runner: ubuntu-26.04,
               platform: "linux/amd64",
               python-version: "3.14",
               url: "https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz",
               sha256: "3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81"
           }
-          - { runner: ubuntu-24.04-arm,
+          - { runner: ubuntu-26.04-arm,
               platform: "linux/arm64",
               python-version: "3.14",
               url: "https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz",
@@ -101,6 +101,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reduce ASLR bits  # This is required to be compatible with TSAN
+        run: sudo sysctl vm.mmap_rnd_bits=28
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -159,7 +162,7 @@ jobs:
       fail-fast: false
       matrix:
         include:  # IMPORTANT: the current setup assumes that all entries refer to the same version of Python
-          - { runner: ubuntu-24.04,
+          - { runner: ubuntu-26.04,
               platform: "linux/amd64",
               python-version: "3.14",
               url: "https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz",
