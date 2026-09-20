@@ -11,8 +11,8 @@ ARG BASE_OS
 RUN apt-get update -q \
 &&  apt-get install -y ca-certificates curl gnupg lsb-release
 
-RUN curl --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
-&&  curl --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+RUN curl --retry-all-errors --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
+&&  curl --retry-all-errors --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
 &&  chmod 644 /usr/share/keyrings/*.gpg
 
 # Configure https://apt.llvm.org/
@@ -202,7 +202,7 @@ RUN apt-get update -q || true \
 &&  apt-get install -y ca-certificates curl gnupg lsb-release \
 && rm -rf /var/lib/apt/lists/*
 
-RUN curl --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
+RUN curl --retry-all-errors --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
 &&  chmod 644 /usr/share/keyrings/*.gpg
 
 # Configure https://apt.llvm.org/
