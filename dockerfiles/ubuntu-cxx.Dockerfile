@@ -4,47 +4,60 @@
 
 ARG BASE_OS=ubuntu:26.04
 
+# curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --show-keys
+# curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --show-keys
+ARG APT_LLVM_ORG_GPG_SIGNATURE=6084F3CF814B57C1CF12EFD515CF4D18AF4F7421
+ARG GITHUB_CLI_GPG_SIGNATURE=7F38BBB59D064DBCB3D84D725612B36462313325
+
 FROM $BASE_OS AS update-apt-src
 
 ARG BASE_OS
+ARG APT_LLVM_ORG_GPG_SIGNATURE
+ARG GITHUB_CLI_GPG_SIGNATURE
 
 RUN apt-get update -q \
-&&  apt-get install -y ca-certificates curl gnupg lsb-release
+&&  apt-get install -y ca-certificates gnupg lsb-release \
+&&  rm -rf /var/lib/apt/lists/* \
+&&  mkdir -p "$HOME/.gnupg" \
+&&  chmod 600 "$HOME/.gnupg"
 
-RUN curl --retry-all-errors --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
-&&  curl --retry-all-errors --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
-&&  chmod 644 /usr/share/keyrings/*.gpg
+RUN gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${APT_LLVM_ORG_GPG_SIGNATURE}" \
+ && gpg --batch --export "${APT_LLVM_ORG_GPG_SIGNATURE}" > /usr/share/keyrings/apt.llvm.org.gpg \
+ && chmod 644 /usr/share/keyrings/apt.llvm.org.gpg
+
+RUN mkdir -p /usr/share/keyrings/github \
+ && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${GITHUB_CLI_GPG_SIGNATURE}" \
+ && gpg --batch --export "${GITHUB_CLI_GPG_SIGNATURE}" > /usr/share/keyrings/github-cli-archive-keyring.gpg \
+ && chmod 644 /usr/share/keyrings/github-cli-archive-keyring.gpg
 
 # Configure https://apt.llvm.org/
 RUN if [ "$BASE_OS" = 'ubuntu:22.04' ] ; then \
     echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list  \
-&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main" >> /etc/apt/sources.list  \
-&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" >> /etc/apt/sources.list; \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-16 main" >> /etc/apt/sources.list; \
 fi
 
-RUN if [ "$BASE_OS" = 'ubuntu:24.04' ] ; then \
-    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list  \
+RUN if [ "$BASE_OS" != 'ubuntu:26.04' ] ; then \
+    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-17 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main"     >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" >> /etc/apt/sources.list; \
 fi
 
-RUN if [ "$BASE_OS" = 'ubuntu:26.04' ] ; then \
-    echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"     >> /etc/apt/sources.list  \
+RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main"     >> /etc/apt/sources.list  \
 &&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-22 main" >> /etc/apt/sources.list  \
 &&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-23 main"     >> /etc/apt/sources.list  \
-&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-23 main" >> /etc/apt/sources.list; \
-fi
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-23 main" >> /etc/apt/sources.list  \
+&&  echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"        >> /etc/apt/sources.list  \
+&&  echo "deb-src [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs) main"    >> /etc/apt/sources.list
 
 # Configure https://cli.github.com/
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" >> /etc/apt/sources.list
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/github-cli-archive-keyring.gpg] https://cli.github.com/packages stable main" >> /etc/apt/sources.list
 
 RUN apt-get update -q
 
@@ -63,6 +76,7 @@ RUN apt-get update -q || true                      \
 &&  apt-get install -q -y --no-install-recommends  \
                           cppcheck                 \
                           git                      \
+                          lsb-release              \
                           make                     \
                           ninja-build              \
                           patch                    \
@@ -101,6 +115,7 @@ ARG COMPILER="$COMPILER_NAME-$COMPILER_VERSION"
 
 RUN if [ $COMPILER_NAME = gcc ] ; then \
       apt-get update -q && apt-get install -q -y \
+        -t "llvm-toolchain-$(lsb_release -cs)-23" \
         clang-tidy-23 \
         "g++-${COMPILER_VERSION}" \
         libc++abi-23-dev \
@@ -112,6 +127,7 @@ fi
 
 RUN if [ $COMPILER_NAME = clang ] ; then \
     apt-get update -q && apt-get install -q -y \
+      -t "llvm-toolchain-$(lsb_release -cs)-${COMPILER_VERSION}" \
       "clang-tidy-${COMPILER_VERSION}" \
       "libc++abi-${COMPILER_VERSION}-dev" \
       "libc++-${COMPILER_VERSION}-dev" \
@@ -120,14 +136,16 @@ RUN if [ $COMPILER_NAME = clang ] ; then \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|2[0-2])$'; then \
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[2-9]|2[0-3])$'; then \
     apt-get update -q && apt-get install -q -y \
+      -t "llvm-toolchain-$(lsb_release -cs)-${COMPILER_VERSION}" \
       "libunwind-${COMPILER_VERSION}-dev" \
     && rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|2[0-2])$'; then \
+RUN if echo "$COMPILER" | grep -Eq '^clang-(1[4-9]|2[0-3])$'; then \
     apt-get update -q && apt-get install -q -y \
+      -t "llvm-toolchain-$(lsb_release -cs)-${COMPILER_VERSION}" \
       "libclang-rt-${COMPILER_VERSION}-dev" \
     && rm -rf /var/lib/apt/lists/*; \
 fi
@@ -189,10 +207,9 @@ FROM ubuntu:22.04 AS ccache-builder
 ARG CCACHE_VER=4.14
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PIP_NO_CACHE_DIR=0
-ARG PYTHON_VERSION=3.10
 ARG CLANG_VERSION=23
 ENV TZ=Etc/UTC
-ARG PYTHON="python${PYTHON_VERSION}"
+ARG PYTHON="python3.10"
 
 ARG PYTHON_VENV=/tmp/venv
 ARG PATH="$PYTHON_VENV/bin:$PATH"
@@ -202,8 +219,7 @@ RUN apt-get update -q || true \
 &&  apt-get install -y ca-certificates curl gnupg lsb-release \
 && rm -rf /var/lib/apt/lists/*
 
-RUN curl --retry-all-errors --connect-timeout 10 --max-time 30 --retry 5 --retry-delay 2 -sSL 'https://apt.llvm.org/llvm-snapshot.gpg.key' | gpg --dearmor > /usr/share/keyrings/apt.llvm.org.gpg \
-&&  chmod 644 /usr/share/keyrings/*.gpg
+COPY --from=update-apt-src /usr/share/keyrings/* /usr/share/keyrings/
 
 # Configure https://apt.llvm.org/
 RUN echo "deb [signed-by=/usr/share/keyrings/apt.llvm.org.gpg] https://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-${CLANG_VERSION} main"     >> /etc/apt/sources.list  \

@@ -73,7 +73,7 @@ RUN printf "%s\n" \
     "-stdlib=libc++" \
     "-fuse-ld=lld" \
     "--rtlib=compiler-rt" \
-    >> /etc/clang22/x86_64-alpine-linux-musl.cfg
+    >> "/etc/clang22/$(arch)-alpine-linux-musl.cfg"
 
 RUN printf '#include <iostream>\nint main(){ std::cout << "test\\n"; }' > /tmp/test.cpp \
 &&  "$CXX" -fsanitize=address /tmp/test.cpp -o /tmp/test \

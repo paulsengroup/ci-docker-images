@@ -102,30 +102,18 @@ def generate_ubuntu(
     runner_arm: str,
 ) -> Dict[str, JobDicts]:
     templates = (
-        # {
-        #     "compiler-name": "gcc",
-        #     "compiler-version": 9,
-        #     "os-version": "22.04",
-        #     "python-version": "3.11",
-        # },
-        # {
-        #     "compiler-name": "gcc",
-        #     "compiler-version": 10,
-        #     "os-version": "24.04",
-        #     "python-version": "3.12",
-        # },
-        # {
-        #     "compiler-name": "gcc",
-        #     "compiler-version": 11,
-        #     "os-version": "26.04",
-        #     "python-version": "3.14",
-        # },
-        # {
-        #     "compiler-name": "gcc",
-        #     "compiler-version": 12,
-        #     "os-version": "26.04",
-        #     "python-version": "3.14",
-        # },
+        {
+            "compiler-name": "gcc",
+            "compiler-version": 12,
+            "os-version": "22.04",
+            "python-version": "3.11",
+        },
+        {
+            "compiler-name": "gcc",
+            "compiler-version": 13,
+            "os-version": "24.04",
+            "python-version": "3.12",
+        },
         {
             "compiler-name": "gcc",
             "compiler-version": 13,
@@ -150,42 +138,6 @@ def generate_ubuntu(
             "os-version": "26.04",
             "python-version": "3.14",
         },
-        # {
-        #     "compiler-name": "clang",
-        #     "compiler-version": 11,
-        #     "os-version": "22.04",
-        #     "python-version": "3.11",
-        # },
-        # {
-        #     "compiler-name": "clang",
-        #     "compiler-version": 12,
-        #     "os-version": "22.04",
-        #     "python-version": "3.11",
-        # },
-        # {
-        #     "compiler-name": "clang",
-        #     "compiler-version": 13,
-        #     "os-version": "22.04",
-        #     "python-version": "3.11",
-        # },
-        # {
-        #     "compiler-name": "clang",
-        #     "compiler-version": 14,
-        #     "os-version": "24.04",
-        #     "python-version": "3.12",
-        # },
-        # {
-        #     "compiler-name": "clang",
-        #     "compiler-version": 15,
-        #     "os-version": "24.04",
-        #     "python-version": "3.12",
-        # },
-        # {
-        #     "compiler-name": "clang",
-        #     "compiler-version": 16,
-        #     "os-version": "24.04",
-        #     "python-version": "3.12",
-        # },
         {
             "compiler-name": "clang",
             "compiler-version": 17,
