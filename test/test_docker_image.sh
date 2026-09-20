@@ -38,7 +38,7 @@ which ccache
 ccache --version
 
 # test Conan
-printf '[requires]\nfmt/11.0.2' > conanfile.txt
+printf '[requires]\nfmt/12.2.0' > conanfile.txt
 conan install --build=missing \
       -pr:b="$CONAN_DEFAULT_PROFILE_PATH" \
       -pr:h="$CONAN_DEFAULT_PROFILE_PATH" \
