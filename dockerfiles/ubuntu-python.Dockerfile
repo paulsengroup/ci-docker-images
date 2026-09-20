@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_OS=ubuntu-cxx   #'ghcr.io/paulsengroup/ci-docker-images/ubuntu-26.04-cxx-clang-23'
+ARG BASE_OS='ghcr.io/paulsengroup/ci-docker-images/ubuntu-26.04-cxx-clang-23'
 ARG FINAL_OS='ubuntu:26.04'
 
 FROM $BASE_OS AS py-src
