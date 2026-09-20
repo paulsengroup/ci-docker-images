@@ -41,7 +41,7 @@ concurrency:
 jobs:
   matrix-factory:
     name: Generate job matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
       matrix-amd64: ${{ steps.generate-matrix.outputs.matrix-amd64 }}
@@ -56,13 +56,13 @@ jobs:
           scripts/generate_job_matrix.py \
             --include-alpine \
             --include-ubuntu \
-            --cmake-version='4.3.*' \
-            --conan-version='2.27.*'
+            --cmake-version='4.4.*' \
+            --conan-version='2.32.*'
 
 
   generate-tags:
     name: Generate Image tags
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       commit-date: ${{ steps.metadata.outputs.commit-date }}
       build-date: ${{ steps.metadata.outputs.build-date }}
@@ -193,7 +193,7 @@ jobs:
 
   merge-images:
     name: Merge images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs:
       - matrix-factory
       - generate-tags
@@ -257,7 +257,7 @@ jobs:
   build-cxx-ubuntu-images-status-check:
     name: Status Check (Build Docker images for CXX development/testing)
     if: ${{ always() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs:
       - matrix-factory
       - build-dockerfile
