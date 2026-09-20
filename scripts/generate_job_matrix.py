@@ -19,12 +19,12 @@ def make_cli() -> argparse.ArgumentParser:
     cli.add_argument(
         "--conan-version",
         type=str,
-        default="2.27.*",
+        default="2.32.*",
     )
     cli.add_argument(
         "--cmake-version",
         type=str,
-        default="4.3.*",
+        default="4.4.*",
     )
     cli.add_argument(
         "--include-alpine",
@@ -39,12 +39,12 @@ def make_cli() -> argparse.ArgumentParser:
     cli.add_argument(
         "--runner-x86",
         type=str,
-        default="ubuntu-24.04",
+        default="ubuntu-26.04",
     )
     cli.add_argument(
         "--runner-arm",
         type=str,
-        default="ubuntu-24.04-arm",
+        default="ubuntu-26.04-arm",
     )
 
     return cli
@@ -59,7 +59,7 @@ def generate_alpine(
 ) -> Dict[str, JobDicts]:
     os_name = "alpine"
     if os_version is None:
-        os_version = "3.23"
+        os_version = "3.24"
 
     includes_amd64 = [
         {
@@ -102,84 +102,90 @@ def generate_ubuntu(
     runner_arm: str,
 ) -> Dict[str, JobDicts]:
     templates = (
-        {
-            "compiler-name": "gcc",
-            "compiler-version": 9,
-            "os-version": "22.04",
-            "python-version": "3.11",
-        },
-        {
-            "compiler-name": "gcc",
-            "compiler-version": 10,
-            "os-version": "24.04",
-            "python-version": "3.12",
-        },
-        {
-            "compiler-name": "gcc",
-            "compiler-version": 11,
-            "os-version": "24.04",
-            "python-version": "3.12",
-        },
-        {
-            "compiler-name": "gcc",
-            "compiler-version": 12,
-            "os-version": "24.04",
-            "python-version": "3.12",
-        },
+        # {
+        #     "compiler-name": "gcc",
+        #     "compiler-version": 9,
+        #     "os-version": "22.04",
+        #     "python-version": "3.11",
+        # },
+        # {
+        #     "compiler-name": "gcc",
+        #     "compiler-version": 10,
+        #     "os-version": "24.04",
+        #     "python-version": "3.12",
+        # },
+        # {
+        #     "compiler-name": "gcc",
+        #     "compiler-version": 11,
+        #     "os-version": "26.04",
+        #     "python-version": "3.14",
+        # },
+        # {
+        #     "compiler-name": "gcc",
+        #     "compiler-version": 12,
+        #     "os-version": "26.04",
+        #     "python-version": "3.14",
+        # },
         {
             "compiler-name": "gcc",
             "compiler-version": 13,
-            "os-version": "24.04",
-            "python-version": "3.12",
+            "os-version": "26.04",
+            "python-version": "3.14",
         },
         {
             "compiler-name": "gcc",
             "compiler-version": 14,
-            "os-version": "24.04",
-            "python-version": "3.12",
+            "os-version": "26.04",
+            "python-version": "3.14",
         },
         {
             "compiler-name": "gcc",
             "compiler-version": 15,
-            "os-version": "25.04",
-            "python-version": "3.13",
+            "os-version": "26.04",
+            "python-version": "3.14",
         },
         {
-            "compiler-name": "clang",
-            "compiler-version": 11,
-            "os-version": "22.04",
-            "python-version": "3.11",
-        },
-        {
-            "compiler-name": "clang",
-            "compiler-version": 12,
-            "os-version": "22.04",
-            "python-version": "3.11",
-        },
-        {
-            "compiler-name": "clang",
-            "compiler-version": 13,
-            "os-version": "22.04",
-            "python-version": "3.11",
-        },
-        {
-            "compiler-name": "clang",
-            "compiler-version": 14,
-            "os-version": "24.04",
-            "python-version": "3.12",
-        },
-        {
-            "compiler-name": "clang",
-            "compiler-version": 15,
-            "os-version": "24.04",
-            "python-version": "3.12",
-        },
-        {
-            "compiler-name": "clang",
+            "compiler-name": "gcc",
             "compiler-version": 16,
-            "os-version": "24.04",
-            "python-version": "3.12",
+            "os-version": "26.04",
+            "python-version": "3.14",
         },
+        # {
+        #     "compiler-name": "clang",
+        #     "compiler-version": 11,
+        #     "os-version": "22.04",
+        #     "python-version": "3.11",
+        # },
+        # {
+        #     "compiler-name": "clang",
+        #     "compiler-version": 12,
+        #     "os-version": "22.04",
+        #     "python-version": "3.11",
+        # },
+        # {
+        #     "compiler-name": "clang",
+        #     "compiler-version": 13,
+        #     "os-version": "22.04",
+        #     "python-version": "3.11",
+        # },
+        # {
+        #     "compiler-name": "clang",
+        #     "compiler-version": 14,
+        #     "os-version": "24.04",
+        #     "python-version": "3.12",
+        # },
+        # {
+        #     "compiler-name": "clang",
+        #     "compiler-version": 15,
+        #     "os-version": "24.04",
+        #     "python-version": "3.12",
+        # },
+        # {
+        #     "compiler-name": "clang",
+        #     "compiler-version": 16,
+        #     "os-version": "24.04",
+        #     "python-version": "3.12",
+        # },
         {
             "compiler-name": "clang",
             "compiler-version": 17,
@@ -198,29 +204,41 @@ def generate_ubuntu(
             "os-version": "24.04",
             "python-version": "3.12",
         },
-        # {
-        #    "compiler-name": "clang",
-        #    "compiler-version": 20,
-        #    "os-version": "24.04",
-        #    "python-version": "3.12",
-        # },
         {
             "compiler-name": "clang",
-            "compiler-version": 21,
+            "compiler-version": 20,
             "os-version": "24.04",
             "python-version": "3.12",
         },
         {
             "compiler-name": "clang",
+            "compiler-version": 21,
+            "os-version": "26.04",
+            "python-version": "3.14",
+        },
+        {
+            "compiler-name": "clang",
             "compiler-version": 22,
+            "os-version": "26.04",
+            "python-version": "3.14",
+        },
+        {
+            "compiler-name": "clang",
+            "compiler-version": 23,
             "os-version": "22.04",
             "python-version": "3.11",
         },
         {
             "compiler-name": "clang",
-            "compiler-version": 22,
+            "compiler-version": 23,
             "os-version": "24.04",
             "python-version": "3.12",
+        },
+        {
+            "compiler-name": "clang",
+            "compiler-version": 23,
+            "os-version": "26.04",
+            "python-version": "3.14",
         },
     )
 
